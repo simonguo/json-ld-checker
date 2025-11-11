@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JSON-LD Checker</title>
+  <link rel="stylesheet" href="settings.css">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1 id="pageTitle"></h1>
+    </header>
+    
+    <div class="content">
+      <section class="settings-section">
+        <h2 id="languageSettingsTitle"></h2>
+        <div class="form-group">
+          <label for="languageSelect" id="languageLabel"></label>
+          <select id="languageSelect" class="language-select">
+            <option value="auto"></option>
+            <option value="zh"></option>
+            <option value="en"></option>
+          </select>
+        </div>
+      </section>
+
+      <section class="settings-section">
+        <h2 id="aiConfigTitle"></h2>
+        <p class="section-description" id="aiConfigDesc"></p>
+        
+        <div class="form-group">
+          <label for="apiKey" id="apiKeyLabel"></label>
+          <div class="input-group">
+            <input 
+              type="password" 
+              id="apiKey" 
+              placeholder="sk-..." 
+              autocomplete="off"
+            >
+            <button id="toggleVisibility" class="btn-icon" title="">
+              <svg id="eyeIcon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                <circle cx="12" cy="12" r="3"/>
+              </svg>
+            </button>
+          </div>
+          <p class="help-text">
+            <span id="apiKeyHelp"></span>
+            <a href="https://platform.openai.com/api-keys" target="_blank" id="getApiKeyLink"></a>
+          </p>
+        </div>
+
+        <div class="form-group">
+          <label id="apiStatusLabel"></label>
+          <div id="apiStatus" class="api-status">
+            <span class="status-indicator"></span>
+            <span class="status-text"></span>
+          </div>
+        </div>
+
+        <div class="button-group">
+          <button id="saveBtn" class="btn btn-primary"></button>
+          <button id="testBtn" class="btn btn-secondary"></button>
+          <button id="clearBtn" class="btn btn-danger"></button>
+        </div>
+
+        <div id="message" class="message" style="display: none;"></div>
+      </section>
+
+      <section class="settings-section">
+        <h2 id="aboutAiFeaturesTitle"></h2>
+        <div class="info-box">
+          <h3 id="aiCheckTitle"></h3>
+          <p id="aiCheckDesc"></p>
+          <ul>
+            <li id="aiCheckFeature1"></li>
+            <li id="aiCheckFeature2"></li>
+            <li id="aiCheckFeature3"></li>
+            <li id="aiCheckFeature4"></li>
+          </ul>
+        </div>
+
+        <div class="info-box">
+          <h3 id="aiSuggestTitle"></h3>
+          <p id="aiSuggestDesc"></p>
+          <ul>
+            <li id="aiSuggestFeature1"></li>
+            <li id="aiSuggestFeature2"></li>
+            <li id="aiSuggestFeature3"></li>
+            <li id="aiSuggestFeature4"></li>
+          </ul>
+        </div>
+      </section>
+
+      <section class="settings-section">
+        <h2 id="privacyNoticeTitle"></h2>
+        <div class="info-box warning">
+          <p id="privacyWarning"></p>
+          <p id="privacyPolicy"></p>
+          <p id="privacyStorage"></p>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <script src="i18n.js"></script>
+  <script src="ai-service.js"></script>
+  <script src="settings.js"></script>
+</body>
+</html>

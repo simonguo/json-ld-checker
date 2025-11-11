@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JSON-LD Checker</title>
+  <link rel="stylesheet" href="sidepanel.css">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>JSON-LD Checker</h1>
+      <div class="header-buttons">
+        <button id="settingsBtn" class="btn-icon" title="设置">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="3"/>
+            <path d="M12 1v6m0 6v6m5.2-13.2l-4.2 4.2m-2 2l-4.2 4.2M23 12h-6m-6 0H5m13.2 5.2l-4.2-4.2m-2-2l-4.2-4.2"/>
+          </svg>
+        </button>
+        <button id="refreshBtn" class="btn-refresh" title="刷新">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/>
+          </svg>
+        </button>
+      </div>
+    </header>
+    
+    <div id="status" class="status"></div>
+    
+    <div id="content">
+      <div class="loading">
+        <div class="spinner"></div>
+        <p></p>
+      </div>
+    </div>
+    
+    <div id="jsonLdContainer" style="display: none;">
+      <div class="tabs">
+        <button class="tab-btn active" data-tab="tree"></button>
+        <button class="tab-btn" data-tab="raw"></button>
+        <button class="tab-btn" data-tab="validation"></button>
+        <button class="tab-btn ai-tab" data-tab="aiCheck">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 4px;">
+            <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+            <path d="M2 17l10 5 10-5M2 12l10 5 10-5"/>
+          </svg>
+        </button>
+        <button class="tab-btn ai-tab" data-tab="aiSuggest">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 4px;">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+          </svg>
+        </button>
+      </div>
+      
+      <div class="tab-content">
+        <div id="treeView" class="tab-pane active"></div>
+        <div id="rawView" class="tab-pane"></div>
+        <div id="validationView" class="tab-pane"></div>
+        <div id="aiCheckView" class="tab-pane"></div>
+        <div id="aiSuggestView" class="tab-pane"></div>
+      </div>
+    </div>
+  </div>
+  
+  <script src="i18n.js"></script>
+  <script src="validator.js"></script>
+  <script src="ai-service.js"></script>
+  <script src="sidepanel.js"></script>
+</body>
+</html>

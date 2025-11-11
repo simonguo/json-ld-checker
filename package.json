@@ -1,0 +1,23 @@
+{
+  "name": "json-ld-checker",
+  "version": "1.1.0",
+  "description": "浏览器插件 - 检查和验证网页中的 JSON-LD 结构化数据",
+  "scripts": {
+    "test": "echo \"打开 test-page.html 进行测试\"",
+    "generate-icons": "node create-icons.js"
+  },
+  "keywords": [
+    "json-ld",
+    "schema.org",
+    "seo",
+    "structured-data",
+    "chrome-extension",
+    "browser-extension",
+    "validator"
+  ],
+  "author": "simonguo",
+  "license": "MIT",
+  "devDependencies": {
+    "canvas": "^2.11.2"
+  }
+}

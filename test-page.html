@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JSON-LD 测试页面</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 40px 20px;
+      background: #f5f5f5;
+    }
+    .container {
+      background: white;
+      padding: 40px;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    h1 {
+      color: #667eea;
+      margin-bottom: 10px;
+    }
+    .subtitle {
+      color: #666;
+      margin-bottom: 30px;
+    }
+    .section {
+      margin: 30px 0;
+      padding: 20px;
+      background: #f8f9fa;
+      border-radius: 8px;
+      border-left: 4px solid #667eea;
+    }
+    .section h2 {
+      margin-top: 0;
+      color: #333;
+    }
+    pre {
+      background: #282c34;
+      color: #abb2bf;
+      padding: 20px;
+      border-radius: 6px;
+      overflow-x: auto;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+    .badge {
+      display: inline-block;
+      padding: 4px 12px;
+      background: #667eea;
+      color: white;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 600;
+      margin-right: 8px;
+    }
+    .badge.success {
+      background: #28a745;
+    }
+    .badge.warning {
+      background: #ffc107;
+      color: #333;
+    }
+    .badge.error {
+      background: #dc3545;
+    }
+    .instructions {
+      background: #e7f3ff;
+      border-left: 4px solid #2196F3;
+      padding: 20px;
+      border-radius: 8px;
+      margin: 30px 0;
+    }
+    .instructions h3 {
+      margin-top: 0;
+      color: #1976D2;
+    }
+    .instructions ol {
+      margin: 15px 0;
+      padding-left: 20px;
+    }
+    .instructions li {
+      margin: 10px 0;
+    }
+  </style>
+
+  <!-- Example 1: Article with complete data -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "@id": "https://example.com/article/1",
+    "headline": "如何使用 JSON-LD 优化 SEO",
+    "alternativeHeadline": "完整的 JSON-LD 结构化数据指南",
+    "image": {
+      "@type": "ImageObject",
+      "url": "https://example.com/images/article.jpg",
+      "width": 1200,
+      "height": 630
+    },
+    "author": {
+      "@type": "Person",
+      "name": "张三",
+      "url": "https://example.com/author/zhangsan"
+    },
+    "publisher": {
+      "@type": "Organization",
+      "name": "示例网站",
+      "logo": {
+        "@type": "ImageObject",
+        "url": "https://example.com/logo.png"
+      }
+    },
+    "datePublished": "2024-11-07T10:00:00+08:00",
+    "dateModified": "2024-11-07T15:30:00+08:00",
+    "description": "这是一篇关于如何正确使用 JSON-LD 结构化数据来提升网站 SEO 效果的完整指南。",
+    "articleBody": "文章正文内容...",
+    "mainEntityOfPage": {
+      "@type": "WebPage",
+      "@id": "https://example.com/article/1"
+    }
+  }
+  </script>
+
+  <!-- Example 2: Product with some issues -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    "name": "示例产品",
+    "image": "https://example.com/product.jpg",
+    "description": "",
+    "brand": "示例品牌",
+    "offers": {
+      "@type": "Offer",
+      "price": "99.99",
+      "priceCurrency": "CNY",
+      "availability": "https://schema.org/InStock"
+    }
+  }
+  </script>
+
+  <!-- Example 3: BreadcrumbList -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      {
+        "@type": "ListItem",
+        "position": 1,
+        "name": "首页",
+        "item": "https://example.com"
+      },
+      {
+        "@type": "ListItem",
+        "position": 2,
+        "name": "文章",
+        "item": "https://example.com/articles"
+      },
+      {
+        "@type": "ListItem",
+        "position": 3,
+        "name": "当前文章"
+      }
+    ]
+  }
+  </script>
+</head>
+<body>
+  <div class="container">
+    <h1>🧪 JSON-LD Checker 测试页面</h1>
+    <p class="subtitle">这个页面包含多个 JSON-LD 示例,用于测试插件功能</p>
+
+    <div class="instructions">
+      <h3>📋 使用说明</h3>
+      <ol>
+        <li>确保已安装 JSON-LD Checker 插件</li>
+        <li>查看浏览器工具栏,插件图标应该显示为 <strong>绿色</strong></li>
+        <li>点击插件图标打开侧边栏</li>
+        <li>使用下拉菜单切换查看 3 个不同的 JSON-LD 数据</li>
+        <li>查看验证结果,了解每个 JSON-LD 的问题和建议</li>
+      </ol>
+    </div>
+
+    <div class="section">
+      <h2><span class="badge success">示例 1</span> Article - 完整数据</h2>
+      <p>这是一个完整的文章类型 JSON-LD,包含所有推荐属性。</p>
+      <p><strong>预期结果:</strong> ✅ 验证通过,可能有少量优化建议</p>
+      <pre>{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "如何使用 JSON-LD 优化 SEO",
+  "author": {
+    "@type": "Person",
+    "name": "张三"
+  },
+  "datePublished": "2024-11-07T10:00:00+08:00",
+  "image": {...},
+  "publisher": {...}
+}</pre>
+    </div>
+
+    <div class="section">
+      <h2><span class="badge warning">示例 2</span> Product - 有问题</h2>
+      <p>这个产品 JSON-LD 有一些问题需要修复。</p>
+      <p><strong>预期问题:</strong></p>
+      <ul>
+        <li>⚠️ description 字段为空字符串</li>
+        <li>💡 缺少推荐的 aggregateRating 属性</li>
+      </ul>
+      <pre>{
+  "@context": "https://schema.org",
+  "@type": "Product",
+  "name": "示例产品",
+  "description": "",  // 空字符串!
+  "offers": {...}
+}</pre>
+    </div>
+
+    <div class="section">
+      <h2><span class="badge">示例 3</span> BreadcrumbList - 面包屑导航</h2>
+      <p>这是一个标准的面包屑导航 JSON-LD。</p>
+      <p><strong>预期结果:</strong> ✅ 结构正确</p>
+      <pre>{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [...]
+}</pre>
+    </div>
+
+    <div class="section">
+      <h2>🔍 测试要点</h2>
+      <ul>
+        <li><strong>图标状态:</strong> 应该显示绿色,表示发现 JSON-LD</li>
+        <li><strong>数量检测:</strong> 应该显示 "发现 3 个 JSON-LD"</li>
+        <li><strong>树形视图:</strong> 可以展开/折叠查看数据结构</li>
+        <li><strong>原始数据:</strong> 显示格式化的 JSON</li>
+        <li><strong>验证结果:</strong> 显示错误、警告和建议</li>
+        <li><strong>切换功能:</strong> 可以在 3 个 JSON-LD 之间切换</li>
+      </ul>
+    </div>
+
+    <div class="section">
+      <h2>💡 提示</h2>
+      <ul>
+        <li>打开浏览器开发者工具 (F12) 可以查看控制台日志</li>
+        <li>右键点击侧边栏选择"检查"可以调试侧边栏</li>
+        <li>修改页面上的 JSON-LD 后刷新页面,插件会自动更新</li>
+        <li>可以在 chrome://extensions/ 查看插件详情和错误</li>
+      </ul>
+    </div>
+
+    <div class="instructions">
+      <h3>🐛 如果遇到问题</h3>
+      <ol>
+        <li><strong>图标不变色:</strong> 刷新页面,确保插件已启用</li>
+        <li><strong>侧边栏无法打开:</strong> 检查浏览器版本是否支持 Side Panel API (Chrome 114+)</li>
+        <li><strong>显示"无法连接到页面":</strong> 刷新页面后重试</li>
+        <li><strong>数据不更新:</strong> 点击侧边栏右上角的刷新按钮</li>
+      </ol>
+    </div>
+  </div>
+
+  <script>
+    // Add some interactivity
+    console.log('📊 JSON-LD 测试页面已加载');
+    console.log('🔍 页面包含 3 个 JSON-LD 结构化数据');
+    console.log('✅ 请打开 JSON-LD Checker 插件查看详情');
+  </script>
+</body>
+</html>
