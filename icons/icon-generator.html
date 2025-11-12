@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <title>JSON-LD 图标生成器</title>
+    <style>
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        margin: 0;
+        padding: 24px;
+        background: #f7f9fc;
+        color: #1f2933;
+      }
+
+      h1 {
+        margin-top: 0;
+      }
+
+      .actions {
+        display: flex;
+        gap: 12px;
+        margin: 16px 0 24px;
+      }
+
+      button {
+        padding: 8px 16px;
+        font-size: 14px;
+        border-radius: 6px;
+        border: 1px solid #3b82f6;
+        background: #3b82f6;
+        color: #fff;
+        cursor: pointer;
+        transition: all 0.2s ease;
+      }
+
+      button.secondary {
+        background: #fff;
+        color: #3b82f6;
+      }
+
+      button:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+      }
+
+      button:hover:not(:disabled) {
+        box-shadow: 0 4px 10px rgba(59, 130, 246, 0.25);
+        transform: translateY(-1px);
+      }
+
+      section {
+        background: #fff;
+        border-radius: 12px;
+        padding: 20px;
+        margin-bottom: 24px;
+        box-shadow: 0 2px 8px rgba(15, 23, 42, 0.08);
+      }
+
+      section h2 {
+        margin-top: 0;
+        margin-bottom: 12px;
+        font-size: 18px;
+      }
+
+      .icon-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 16px;
+      }
+
+      .icon-card {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 12px;
+        padding: 16px;
+        border: 1px solid rgba(15, 23, 42, 0.08);
+        border-radius: 10px;
+        background: linear-gradient(180deg, rgba(255,255,255,0.95) 0%, rgba(248,250,252,0.95) 100%);
+      }
+
+      canvas {
+        border-radius: 16px;
+        background: transparent;
+      }
+
+      .size-label {
+        font-size: 14px;
+        color: #475569;
+      }
+
+      footer {
+        margin-top: 40px;
+        font-size: 13px;
+        color: #64748b;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>JSON-LD 图标生成器（浏览器版）</h1>
+    <p>
+      在浏览器中打开本页面即可生成所有 PNG 图标。您可以单独下载每个尺寸，或点击
+      “依次下载全部 PNG” 自动触发全部下载（浏览器可能提示允许多个下载）。
+    </p>
+
+    <div class="actions">
+      <button id="regenerate">重新生成</button>
+      <button id="downloadAll" class="secondary">依次下载全部 PNG</button>
+    </div>
+
+    <div id="iconContainer"></div>
+
+    <footer>
+      如果图标有更新，可修改本文件中的参数后刷新页面重新生成。
+    </footer>
+
+    <script>
+      const variants = [
+        { title: '默认（紫色）', color: '#667eea', prefix: 'icon' },
+        { title: '激活（绿色）', color: '#28a745', prefix: 'icon-active' },
+        { title: '未激活（灰色）', color: '#6c757d', prefix: 'icon-inactive' }
+      ];
+
+      const sizes = [16, 32, 48, 128];
+      const iconRecords = [];
+
+      const iconContainer = document.getElementById('iconContainer');
+      const downloadAllBtn = document.getElementById('downloadAll');
+      const regenerateBtn = document.getElementById('regenerate');
+
+      function drawIcon(canvas, { size, color, label }) {
+        const ctx = canvas.getContext('2d');
+        canvas.width = size;
+        canvas.height = size;
+
+        ctx.clearRect(0, 0, size, size);
+
+        // Background with rounded corners matching SVG rx values
+        ctx.fillStyle = color;
+        ctx.beginPath();
+        let radius;
+        if (size === 16) radius = 3;
+        else if (size === 32) radius = 5;
+        else if (size === 48) radius = 7;
+        else if (size === 128) radius = 20;
+        else radius = Math.round(size * 0.15);
+        roundedRect(ctx, 0, 0, size, size, radius);
+        ctx.fill();
+
+        // Braces - match SVG font sizes and positions exactly
+        ctx.fillStyle = '#ffffff';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'alphabetic';
+        
+        let bracesFontSize, bracesY;
+        if (size === 16) {
+          bracesFontSize = 10;
+          bracesY = 11;
+        } else if (size === 32) {
+          bracesFontSize = 20;
+          bracesY = 22;
+        } else if (size === 48) {
+          bracesFontSize = 28;
+          bracesY = 33;
+        } else if (size === 128) {
+          bracesFontSize = 72;
+          bracesY = 70;
+        } else {
+          bracesFontSize = Math.round(size * 0.56);
+          bracesY = size * 0.55;
+        }
+        
+        ctx.font = `bold ${bracesFontSize}px Arial`;
+        ctx.fillText('{}', size / 2, bracesY);
+
+        // Label for 128px icons
+        if (label && size === 128) {
+          ctx.font = '600 18px Arial';
+          ctx.fillStyle = 'rgba(255,255,255,0.9)';
+          ctx.fillText(label, size / 2, 108);
+        }
+      }
+
+      function roundedRect(ctx, x, y, width, height, radius) {
+        const r = Math.min(radius, width / 2, height / 2);
+        ctx.beginPath();
+        ctx.moveTo(x + r, y);
+        ctx.lineTo(x + width - r, y);
+        ctx.quadraticCurveTo(x + width, y, x + width, y + r);
+        ctx.lineTo(x + width, y + height - r);
+        ctx.quadraticCurveTo(x + width, y + height, x + width - r, y + height);
+        ctx.lineTo(x + r, y + height);
+        ctx.quadraticCurveTo(x, y + height, x, y + height - r);
+        ctx.lineTo(x, y + r);
+        ctx.quadraticCurveTo(x, y, x + r, y);
+        ctx.closePath();
+      }
+
+      function createIconCards() {
+        iconContainer.innerHTML = '';
+        iconRecords.length = 0;
+
+        variants.forEach(variant => {
+          const section = document.createElement('section');
+          const title = document.createElement('h2');
+          title.textContent = variant.title;
+          section.appendChild(title);
+
+          const grid = document.createElement('div');
+          grid.className = 'icon-grid';
+          section.appendChild(grid);
+
+          sizes.forEach(size => {
+            const card = document.createElement('div');
+            card.className = 'icon-card';
+
+            const sizeLabel = document.createElement('div');
+            sizeLabel.className = 'size-label';
+            sizeLabel.textContent = `${variant.prefix}-${size}.png`;
+            card.appendChild(sizeLabel);
+
+            const canvas = document.createElement('canvas');
+            drawIcon(canvas, {
+              size,
+              color: variant.color,
+              label: size === 128 ? 'JSON-LD' : ''
+            });
+            card.appendChild(canvas);
+
+            const downloadBtn = document.createElement('button');
+            downloadBtn.className = 'secondary';
+            downloadBtn.textContent = `下载 ${size}px`;
+            downloadBtn.addEventListener('click', () => {
+              triggerDownload(canvas, `${variant.prefix}-${size}.png`);
+            });
+            card.appendChild(downloadBtn);
+
+            iconRecords.push({ canvas, filename: `${variant.prefix}-${size}.png` });
+            grid.appendChild(card);
+          });
+
+          iconContainer.appendChild(section);
+        });
+      }
+
+      function triggerDownload(canvas, filename) {
+        const link = document.createElement('a');
+        link.download = filename;
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+      }
+
+      function downloadSequentially(index = 0) {
+        if (index >= iconRecords.length) {
+          downloadAllBtn.disabled = false;
+          downloadAllBtn.textContent = '依次下载全部 PNG';
+          return;
+        }
+
+        const { canvas, filename } = iconRecords[index];
+        triggerDownload(canvas, filename);
+
+        setTimeout(() => downloadSequentially(index + 1), 400);
+      }
+
+      downloadAllBtn.addEventListener('click', () => {
+        if (!iconRecords.length) return;
+        downloadAllBtn.disabled = true;
+        downloadAllBtn.textContent = '正在下载...';
+        downloadSequentially();
+      });
+
+      regenerateBtn.addEventListener('click', () => {
+        createIconCards();
+      });
+
+      createIconCards();
+    </script>
+  </body>
+</html>

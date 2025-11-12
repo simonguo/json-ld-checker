@@ -132,13 +132,15 @@ header h1 {
 .tabs {
   display: flex;
   gap: 4px;
-  padding: 0 20px;
+  padding: 0;
   background: #f8f9fa;
   border-bottom: 2px solid #e9ecef;
+  flex-wrap: nowrap;
+  overflow-x: auto;
 }
 
 .tab-btn {
-  padding: 12px 20px;
+  padding: 12px 16px;
   background: transparent;
   border: none;
   border-bottom: 2px solid transparent;
@@ -147,6 +149,13 @@ header h1 {
   color: #666;
   transition: all 0.2s;
   margin-bottom: -2px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  flex: 0 0 auto;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .tab-btn:hover {

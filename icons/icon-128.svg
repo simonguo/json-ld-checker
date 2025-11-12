@@ -1,5 +1,5 @@
 <svg width="128" height="128" xmlns="http://www.w3.org/2000/svg">
   <rect width="128" height="128" rx="20" fill="#667eea"/>
-  <text x="64" y="88" font-family="Arial, sans-serif" font-size="72" font-weight="bold" fill="white" text-anchor="middle">{}</text>
-  <text x="64" y="108" font-family="Arial, sans-serif" font-size="16" fill="white" text-anchor="middle">LD</text>
+  <text x="64" y="70" font-family="Arial, sans-serif" font-size="72" font-weight="bold" fill="white" text-anchor="middle">{}</text>
+  <text x="64" y="108" font-family="Arial, sans-serif" font-size="18" font-weight="600" fill="rgba(255,255,255,0.9)" text-anchor="middle" letter-spacing="1">JSON-LD</text>
 </svg>
