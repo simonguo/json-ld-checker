@@ -1,9 +1,9 @@
 {
   "name": "json-ld-checker",
   "version": "1.1.0",
-  "description": "浏览器插件 - 检查和验证网页中的 JSON-LD 结构化数据",
+  "description": "Browser extension for checking and validating JSON-LD structured data",
   "scripts": {
-    "test": "echo \"打开 test-page.html 进行测试\""
+    "test": "echo \"Open test-page.html to run tests\""
   },
   "keywords": [
     "json-ld",

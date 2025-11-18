@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <title>JSON-LD Checker Promo Generator</title>
+    <style>
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        margin: 0;
+        padding: 32px;
+        background: #f7f9fc;
+        color: #1f2933;
+      }
+
+      h1 {
+        margin-top: 0;
+        margin-bottom: 8px;
+      }
+
+      .subtitle {
+        color: #64748b;
+        margin-bottom: 32px;
+      }
+
+      .promo-section {
+        background: #fff;
+        border-radius: 12px;
+        padding: 24px;
+        margin-bottom: 24px;
+        box-shadow: 0 2px 8px rgba(15, 23, 42, 0.08);
+      }
+
+      .promo-section h2 {
+        margin-top: 0;
+        margin-bottom: 16px;
+        font-size: 18px;
+      }
+
+      .canvas-container {
+        display: flex;
+        justify-content: center;
+        margin: 20px 0;
+        background: #f8fafc;
+        border-radius: 8px;
+        padding: 20px;
+      }
+
+      canvas {
+        border: 1px solid #e2e8f0;
+        border-radius: 4px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        max-width: 100%;
+        height: auto;
+      }
+
+      .actions {
+        display: flex;
+        gap: 12px;
+        margin-top: 16px;
+      }
+
+      button {
+        padding: 10px 20px;
+        font-size: 14px;
+        border-radius: 6px;
+        border: 1px solid #667eea;
+        background: #667eea;
+        color: #fff;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        font-weight: 500;
+      }
+
+      button:hover {
+        background: #5568d3;
+        box-shadow: 0 4px 10px rgba(102, 126, 234, 0.3);
+        transform: translateY(-1px);
+      }
+
+      button.secondary {
+        background: #fff;
+        color: #667eea;
+      }
+
+      button.secondary:hover {
+        background: #f8f9fa;
+      }
+
+      .info {
+        font-size: 13px;
+        color: #64748b;
+        margin-top: 12px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>JSON-LD Checker Promo Generator</h1>
+    <p class="subtitle">Create marketing creatives for the Chrome Web Store</p>
+
+    <div class="promo-section">
+      <h2>Small Promo Tile (440x280)</h2>
+      <div class="canvas-container">
+        <canvas id="smallCanvas"></canvas>
+      </div>
+      <div class="actions">
+        <button onclick="downloadSmall()">Download PNG</button>
+        <button class="secondary" onclick="downloadSmallJPEG()">Download JPEG</button>
+        <button class="secondary" onclick="regenerateSmall()">Regenerate</button>
+      </div>
+      <div class="info">JPEG or 24-bit PNG (no alpha channel)</div>
+    </div>
+
+    <div class="promo-section">
+      <h2>Hero Banner (1400x560)</h2>
+      <div class="canvas-container">
+        <canvas id="largeCanvas"></canvas>
+      </div>
+      <div class="actions">
+        <button onclick="downloadLarge()">Download PNG</button>
+        <button class="secondary" onclick="downloadLargeJPEG()">Download JPEG</button>
+        <button class="secondary" onclick="regenerateLarge()">Regenerate</button>
+      </div>
+      <div class="info">JPEG or 24-bit PNG (no alpha channel)</div>
+    </div>
+
+    <script>
+      const smallCanvas = document.getElementById('smallCanvas');
+      const largeCanvas = document.getElementById('largeCanvas');
+
+      function drawSmallPromo() {
+        const canvas = smallCanvas;
+        const ctx = canvas.getContext('2d');
+        canvas.width = 440;
+        canvas.height = 280;
+
+        // Background gradient
+        const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+        gradient.addColorStop(0, '#667eea');
+        gradient.addColorStop(1, '#764ba2');
+        ctx.fillStyle = gradient;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        // Icon background circle
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.15)';
+        ctx.beginPath();
+        ctx.arc(90, 140, 60, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Draw icon braces
+        ctx.fillStyle = '#ffffff';
+        ctx.font = 'bold 60px Arial';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('{}', 90, 140);
+
+        // Title - single line
+        ctx.font = 'bold 28px Arial';
+        ctx.fillStyle = '#ffffff';
+        ctx.textAlign = 'left';
+        ctx.fillText('JSON-LD Checker', 170, 90);
+
+        // Description
+        ctx.font = '14px Arial';
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+        ctx.fillText('Validate and analyze structured data', 170, 125);
+
+        // Features
+        const features = ['✓ Real-time validation', '✓ AI-powered insights', '✓ SEO optimization'];
+        ctx.font = '13px Arial';
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+        features.forEach((feature, index) => {
+          ctx.fillText(feature, 170, 160 + index * 26);
+        });
+      }
+
+      function drawLargePromo() {
+        const canvas = largeCanvas;
+        const ctx = canvas.getContext('2d');
+        canvas.width = 1400;
+        canvas.height = 560;
+
+        // Background gradient
+        const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+        gradient.addColorStop(0, '#667eea');
+        gradient.addColorStop(0.5, '#764ba2');
+        gradient.addColorStop(1, '#667eea');
+        ctx.fillStyle = gradient;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        // Decorative circles
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.08)';
+        ctx.beginPath();
+        ctx.arc(200, 280, 180, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.05)';
+        ctx.beginPath();
+        ctx.arc(1200, 280, 220, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Main icon
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.2)';
+        ctx.beginPath();
+        ctx.arc(280, 280, 120, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.fillStyle = '#ffffff';
+        ctx.font = 'bold 120px Arial';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('{}', 280, 280);
+
+        // Title
+        ctx.font = 'bold 72px Arial';
+        ctx.fillStyle = '#ffffff';
+        ctx.textAlign = 'left';
+        ctx.fillText('JSON-LD Checker', 460, 200);
+
+        // Subtitle
+        ctx.font = '600 36px Arial';
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
+        ctx.fillText('Professional structured data toolkit', 460, 260);
+
+        // Features section
+        const features = [
+          { icon: '✓', text: 'Real-time JSON-LD validation' },
+          { icon: '✓', text: 'AI recommendations' },
+          { icon: '✓', text: 'SEO improvements' },
+          { icon: '✓', text: 'Multi-language support' }
+        ];
+
+        ctx.font = '24px Arial';
+        features.forEach((feature, index) => {
+          const y = 320 + index * 45;
+          
+          // Icon circle
+          ctx.fillStyle = 'rgba(255, 255, 255, 0.25)';
+          ctx.beginPath();
+          ctx.arc(475, y, 16, 0, Math.PI * 2);
+          ctx.fill();
+
+          // Check mark - centered properly
+          ctx.fillStyle = '#ffffff';
+          ctx.font = 'bold 18px Arial';
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.fillText(feature.icon, 475, y);
+
+          // Feature text
+          ctx.font = '24px Arial';
+          ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
+          ctx.textAlign = 'left';
+          ctx.textBaseline = 'middle';
+          ctx.fillText(feature.text, 510, y);
+        });
+      }
+
+      function roundRect(ctx, x, y, width, height, radius) {
+        ctx.beginPath();
+        ctx.moveTo(x + radius, y);
+        ctx.lineTo(x + width - radius, y);
+        ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+        ctx.lineTo(x + width, y + height - radius);
+        ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+        ctx.lineTo(x + radius, y + height);
+        ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+        ctx.lineTo(x, y + radius);
+        ctx.quadraticCurveTo(x, y, x + radius, y);
+        ctx.closePath();
+      }
+
+      function downloadCanvas(canvas, filename, format = 'png') {
+        const link = document.createElement('a');
+        link.download = filename;
+        
+        if (format === 'jpeg') {
+          // Create a new canvas with white background for JPEG
+          const tempCanvas = document.createElement('canvas');
+          tempCanvas.width = canvas.width;
+          tempCanvas.height = canvas.height;
+          const tempCtx = tempCanvas.getContext('2d');
+          
+          // Fill white background
+          tempCtx.fillStyle = '#ffffff';
+          tempCtx.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
+          
+          // Draw original canvas on top
+          tempCtx.drawImage(canvas, 0, 0);
+          
+          link.href = tempCanvas.toDataURL('image/jpeg', 0.95);
+        } else {
+          link.href = canvas.toDataURL('image/png');
+        }
+        
+        link.click();
+      }
+
+      function downloadSmall() {
+        downloadCanvas(smallCanvas, 'json-ld-checker-small-440x280.png', 'png');
+      }
+
+      function downloadSmallJPEG() {
+        downloadCanvas(smallCanvas, 'json-ld-checker-small-440x280.jpg', 'jpeg');
+      }
+
+      function downloadLarge() {
+        downloadCanvas(largeCanvas, 'json-ld-checker-large-1400x560.png', 'png');
+      }
+
+      function downloadLargeJPEG() {
+        downloadCanvas(largeCanvas, 'json-ld-checker-large-1400x560.jpg', 'jpeg');
+      }
+
+      function regenerateSmall() {
+        drawSmallPromo();
+      }
+
+      function regenerateLarge() {
+        drawLargePromo();
+      }
+
+      // Initial draw
+      drawSmallPromo();
+      drawLargePromo();
+    </script>
+  </body>
+</html>
