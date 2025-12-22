@@ -1,5 +1,10 @@
 // Background service worker
 
+// Debug: Log UI language
+const uiLang = chrome.i18n.getUILanguage ? chrome.i18n.getUILanguage() : 'unknown';
+console.log('[Background] Chrome UI Language:', uiLang);
+console.log('[Background] Test message (settings):', chrome.i18n.getMessage('settings'));
+
 const ICON_ACTIVE = {
   16: 'icons/png/icon-active-16.png',
   32: 'icons/png/icon-active-32.png',
@@ -20,6 +25,12 @@ const tabData = new Map();
 // Listen for messages from content script
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.action === 'jsonLdDetected') {
+    // Check if sender.tab exists (message is from a content script in a tab)
+    if (!sender.tab || !sender.tab.id) {
+      console.warn('jsonLdDetected message received but sender.tab is undefined');
+      return true;
+    }
+    
     const tabId = sender.tab.id;
     tabData.set(tabId, request.data);
     
@@ -28,13 +39,13 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       chrome.action.setIcon({ tabId, path: ICON_ACTIVE });
       chrome.action.setTitle({ 
         tabId, 
-        title: `JSON-LD Checker - 发现 ${request.data.count} 个 JSON-LD` 
+        title: chrome.i18n.getMessage('iconTitleFound', [request.data.count.toString()])
       });
     } else {
       chrome.action.setIcon({ tabId, path: ICON_INACTIVE });
       chrome.action.setTitle({ 
         tabId, 
-        title: 'JSON-LD Checker - 未发现 JSON-LD' 
+        title: chrome.i18n.getMessage('iconTitleNotFound')
       });
     }
   }

@@ -9,36 +9,25 @@
 <body>
   <div class="container">
     <header>
-      <h1 id="pageTitle"></h1>
+      <h1 id="pageTitle" data-i18n="settingsTitle"></h1>
     </header>
     
     <div class="content">
       <section class="settings-section">
-        <h2 id="languageSettingsTitle"></h2>
-        <div class="form-group">
-          <label for="languageSelect" id="languageLabel"></label>
-          <select id="languageSelect" class="language-select">
-            <option value="auto"></option>
-            <option value="zh"></option>
-            <option value="en"></option>
-          </select>
-        </div>
-      </section>
-
-      <section class="settings-section">
-        <h2 id="aiConfigTitle"></h2>
-        <p class="section-description" id="aiConfigDesc"></p>
+        <h2 id="aiConfigTitle" data-i18n="aiConfiguration"></h2>
+        <p class="section-description" id="aiConfigDesc" data-i18n="aiConfigDescription"></p>
         
         <div class="form-group">
-          <label for="apiKey" id="apiKeyLabel"></label>
+          <label for="apiKey" id="apiKeyLabel" data-i18n="apiKeyLabel"></label>
           <div class="input-group">
             <input 
               type="password" 
               id="apiKey" 
+              data-i18n-placeholder="apiKeyPlaceholder"
               placeholder="sk-..." 
               autocomplete="off"
             >
-            <button id="toggleVisibility" class="btn-icon" title="">
+            <button id="toggleVisibility" class="btn-icon" title="" data-i18n-title="showHide">
               <svg id="eyeIcon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
                 <circle cx="12" cy="12" r="3"/>
@@ -46,13 +35,13 @@
             </button>
           </div>
           <p class="help-text">
-            <span id="apiKeyHelp"></span>
-            <a href="https://platform.openai.com/api-keys" target="_blank" id="getApiKeyLink"></a>
+            <span id="apiKeyHelp" data-i18n="apiKeyHelp"></span>
+            <a href="https://platform.openai.com/api-keys" target="_blank" id="getApiKeyLink" data-i18n="getApiKey"></a>
           </p>
         </div>
 
         <div class="form-group">
-          <label id="apiStatusLabel"></label>
+          <label id="apiStatusLabel" data-i18n="apiStatusLabel"></label>
           <div id="apiStatus" class="api-status">
             <span class="status-indicator"></span>
             <span class="status-text"></span>
@@ -60,51 +49,51 @@
         </div>
 
         <div class="button-group">
-          <button id="saveBtn" class="btn btn-primary"></button>
-          <button id="testBtn" class="btn btn-secondary"></button>
-          <button id="clearBtn" class="btn btn-danger"></button>
+          <button id="saveBtn" class="btn btn-primary" data-i18n="saveConfig"></button>
+          <button id="testBtn" class="btn btn-secondary" data-i18n="testConnection"></button>
+          <button id="clearBtn" class="btn btn-danger" data-i18n="clearConfig"></button>
         </div>
 
         <div id="message" class="message" style="display: none;"></div>
       </section>
 
       <section class="settings-section">
-        <h2 id="aboutAiFeaturesTitle"></h2>
+        <h2 id="aboutAiFeaturesTitle" data-i18n="aboutAiFeatures"></h2>
         <div class="info-box">
-          <h3 id="aiCheckTitle"></h3>
-          <p id="aiCheckDesc"></p>
+          <h3 id="aiCheckTitle" data-i18n="aiCheckTitle"></h3>
+          <p id="aiCheckDesc" data-i18n="aiCheckDesc"></p>
           <ul>
-            <li id="aiCheckFeature1"></li>
-            <li id="aiCheckFeature2"></li>
-            <li id="aiCheckFeature3"></li>
-            <li id="aiCheckFeature4"></li>
+            <li id="aiCheckFeature1" data-i18n="aiCheckFeature1"></li>
+            <li id="aiCheckFeature2" data-i18n="aiCheckFeature2"></li>
+            <li id="aiCheckFeature3" data-i18n="aiCheckFeature3"></li>
+            <li id="aiCheckFeature4" data-i18n="aiCheckFeature4"></li>
           </ul>
         </div>
 
         <div class="info-box">
-          <h3 id="aiSuggestTitle"></h3>
-          <p id="aiSuggestDesc"></p>
+          <h3 id="aiSuggestTitle" data-i18n="aiSuggestTitle"></h3>
+          <p id="aiSuggestDesc" data-i18n="aiSuggestDesc"></p>
           <ul>
-            <li id="aiSuggestFeature1"></li>
-            <li id="aiSuggestFeature2"></li>
-            <li id="aiSuggestFeature3"></li>
-            <li id="aiSuggestFeature4"></li>
+            <li id="aiSuggestFeature1" data-i18n="aiSuggestFeature1"></li>
+            <li id="aiSuggestFeature2" data-i18n="aiSuggestFeature2"></li>
+            <li id="aiSuggestFeature3" data-i18n="aiSuggestFeature3"></li>
+            <li id="aiSuggestFeature4" data-i18n="aiSuggestFeature4"></li>
           </ul>
         </div>
       </section>
 
       <section class="settings-section">
-        <h2 id="privacyNoticeTitle"></h2>
+        <h2 id="privacyNoticeTitle" data-i18n="privacyNotice"></h2>
         <div class="info-box warning">
-          <p id="privacyWarning"></p>
-          <p id="privacyPolicy"></p>
-          <p id="privacyStorage"></p>
+          <p id="privacyWarning" data-i18n="privacyWarning"></p>
+          <p id="privacyPolicy" data-i18n="privacyPolicy"></p>
+          <p id="privacyStorage" data-i18n="privacyStorage"></p>
         </div>
       </section>
     </div>
   </div>
 
-  <script src="i18n.js"></script>
+  <script src="localize.js"></script>
   <script src="ai-service.js"></script>
   <script src="settings.js"></script>
 </body>

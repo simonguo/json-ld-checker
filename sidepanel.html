@@ -9,9 +9,9 @@
   <body>
     <div class="container">
       <header>
-        <h1>JSON-LD Checker</h1>
+        <h1 data-i18n="extensionName">JSON-LD Checker</h1>
         <div class="header-buttons">
-          <button id="refreshBtn" class="btn-refresh" title="刷新">
+          <button id="refreshBtn" class="btn-refresh" title="" data-i18n-title="refresh">
             <svg
               width="16"
               height="16"
@@ -25,7 +25,7 @@
               />
             </svg>
           </button>
-          <button id="settingsBtn" class="btn-icon" title="设置">
+          <button id="settingsBtn" class="btn-icon" title="" data-i18n-title="settings">
             <svg
               width="16"
               height="16"
@@ -50,7 +50,7 @@
       <div id="content">
         <div class="loading">
           <div class="spinner"></div>
-          <p></p>
+          <p data-i18n="loading"></p>
         </div>
       </div>
 
@@ -100,7 +100,7 @@
       </div>
     </div>
 
-    <script src="i18n.js"></script>
+    <script src="localize.js"></script>
     <script src="validator.js"></script>
     <script src="ai-service.js"></script>
     <script src="sidepanel.js"></script>

@@ -1,6 +1,10 @@
 // Settings page script
 const aiService = new AIService();
 
+function t(key, substitutions) {
+  return chrome.i18n.getMessage(key, substitutions);
+}
+
 // DOM elements
 const apiKeyInput = document.getElementById('apiKey');
 const toggleVisibilityBtn = document.getElementById('toggleVisibility');
@@ -10,114 +14,18 @@ const saveBtn = document.getElementById('saveBtn');
 const testBtn = document.getElementById('testBtn');
 const clearBtn = document.getElementById('clearBtn');
 const messageDiv = document.getElementById('message');
-const languageSelect = document.getElementById('languageSelect');
 
 // Initialize
 document.addEventListener('DOMContentLoaded', async () => {
-  // Wait for i18n to load
-  await i18n.loadLocale();
-  
-  // Set HTML lang attribute
-  document.documentElement.lang = i18n.getLocale() === 'zh' ? 'zh-CN' : 'en';
-  
-  // Update UI text
-  updateUIText();
-  
-  // Load current language setting
-  await loadLanguageSetting();
-  
+  // Localize static DOM
+  localizeHtmlPage(document);
+  document.title = t('settingsTitle') + ' - JSON-LD Checker';
+
   await loadSettings();
   setupEventListeners();
 });
 
-function updateUIText() {
-  // Page title
-  document.getElementById('pageTitle').textContent = i18n.t('settingsTitle');
-  document.title = i18n.t('settingsTitle') + ' - JSON-LD Checker';
-  
-  // Language settings
-  document.getElementById('languageSettingsTitle').textContent = i18n.t('languageSettings');
-  document.getElementById('languageLabel').textContent = i18n.t('languageLabel');
-  
-  // Language options
-  const options = languageSelect.querySelectorAll('option');
-  options[0].textContent = i18n.t('languageAuto');
-  options[1].textContent = i18n.t('languageChinese');
-  options[2].textContent = i18n.t('languageEnglish');
-  
-  // AI Configuration
-  document.getElementById('aiConfigTitle').textContent = i18n.t('aiConfiguration');
-  document.getElementById('aiConfigDesc').textContent = i18n.t('aiConfigDescription');
-  document.getElementById('apiKeyLabel').textContent = i18n.t('apiKeyLabel');
-  document.getElementById('apiKey').placeholder = i18n.t('apiKeyPlaceholder');
-  document.getElementById('toggleVisibility').title = i18n.t('showHide');
-  document.getElementById('apiKeyHelp').textContent = i18n.t('apiKeyHelp');
-  document.getElementById('getApiKeyLink').textContent = i18n.t('getApiKey');
-  document.getElementById('apiStatusLabel').textContent = i18n.t('apiStatusLabel');
-  
-  // Buttons
-  saveBtn.textContent = i18n.t('saveConfig');
-  testBtn.textContent = i18n.t('testConnection');
-  clearBtn.textContent = i18n.t('clearConfig');
-  
-  // About AI Features
-  document.getElementById('aboutAiFeaturesTitle').textContent = i18n.t('aboutAiFeatures');
-  document.getElementById('aiCheckTitle').textContent = i18n.t('aiCheckTitle');
-  document.getElementById('aiCheckDesc').textContent = i18n.t('aiCheckDesc');
-  document.getElementById('aiCheckFeature1').textContent = i18n.t('aiCheckFeature1');
-  document.getElementById('aiCheckFeature2').textContent = i18n.t('aiCheckFeature2');
-  document.getElementById('aiCheckFeature3').textContent = i18n.t('aiCheckFeature3');
-  document.getElementById('aiCheckFeature4').textContent = i18n.t('aiCheckFeature4');
-  
-  document.getElementById('aiSuggestTitle').textContent = i18n.t('aiSuggestTitle');
-  document.getElementById('aiSuggestDesc').textContent = i18n.t('aiSuggestDesc');
-  document.getElementById('aiSuggestFeature1').textContent = i18n.t('aiSuggestFeature1');
-  document.getElementById('aiSuggestFeature2').textContent = i18n.t('aiSuggestFeature2');
-  document.getElementById('aiSuggestFeature3').textContent = i18n.t('aiSuggestFeature3');
-  document.getElementById('aiSuggestFeature4').textContent = i18n.t('aiSuggestFeature4');
-  
-  // Privacy Notice
-  document.getElementById('privacyNoticeTitle').textContent = i18n.t('privacyNotice');
-  document.getElementById('privacyWarning').textContent = i18n.t('privacyWarning');
-  document.getElementById('privacyPolicy').textContent = i18n.t('privacyPolicy');
-  document.getElementById('privacyStorage').textContent = i18n.t('privacyStorage');
-}
-
-async function loadLanguageSetting() {
-  try {
-    const result = await chrome.storage.local.get(['language']);
-    const savedLang = result.language || 'auto';
-    languageSelect.value = savedLang;
-  } catch (error) {
-    console.error('Failed to load language setting:', error);
-    languageSelect.value = 'auto';
-  }
-}
-
 function setupEventListeners() {
-  // Language selector
-  languageSelect.addEventListener('change', async (e) => {
-    const newLang = e.target.value;
-    await i18n.setLocale(newLang);
-    
-    // Update HTML lang attribute
-    document.documentElement.lang = i18n.getLocale() === 'zh' ? 'zh-CN' : 'en';
-    
-    // Update all UI text
-    updateUIText();
-    
-    // Update status text if needed
-    const statusText = apiStatus.querySelector('.status-text').textContent;
-    if (statusText) {
-      const hasKey = await aiService.initialize();
-      if (hasKey) {
-        updateStatus('configured', i18n.t('statusConfigured'));
-      } else {
-        updateStatus('unconfigured', i18n.t('statusUnconfigured'));
-      }
-    }
-  });
-  
   // Toggle password visibility
   toggleVisibilityBtn.addEventListener('click', () => {
     const type = apiKeyInput.type === 'password' ? 'text' : 'password';
@@ -160,13 +68,13 @@ async function loadSettings() {
     if (hasKey) {
       const key = await aiService.getApiKey();
       apiKeyInput.value = key;
-      updateStatus('configured', i18n.t('statusConfigured'));
+      updateStatus('configured', t('statusConfigured'));
     } else {
-      updateStatus('unconfigured', i18n.t('statusUnconfigured'));
+      updateStatus('unconfigured', t('statusUnconfigured'));
     }
   } catch (error) {
     console.error('Failed to load settings:', error);
-    showMessage(i18n.t('loadSettingsFailed'), 'error');
+    showMessage(t('loadSettingsFailed'), 'error');
   }
 }
 
@@ -174,28 +82,28 @@ async function saveSettings() {
   const apiKey = apiKeyInput.value.trim();
   
   if (!apiKey) {
-    showMessage(i18n.t('enterApiKey'), 'error');
+    showMessage(t('enterApiKey'), 'error');
     return;
   }
 
   if (!apiKey.startsWith('sk-')) {
-    showMessage(i18n.t('invalidApiKeyFormat'), 'error');
+    showMessage(t('invalidApiKeyFormat'), 'error');
     return;
   }
 
   try {
     saveBtn.disabled = true;
-    saveBtn.innerHTML = `<span class="spinner"></span>${i18n.t('saving')}`;
+    saveBtn.innerHTML = `<span class="spinner"></span>${t('saving')}`;
     
     await aiService.setApiKey(apiKey);
-    updateStatus('configured', i18n.t('statusConfigured'));
-    showMessage(i18n.t('apiKeySaved'), 'success');
+    updateStatus('configured', t('statusConfigured'));
+    showMessage(t('apiKeySaved'), 'success');
   } catch (error) {
     console.error('Failed to save API key:', error);
-    showMessage(i18n.t('saveFailed') + ': ' + error.message, 'error');
+    showMessage(t('saveFailed') + ': ' + error.message, 'error');
   } finally {
     saveBtn.disabled = false;
-    saveBtn.textContent = i18n.t('saveConfig');
+    saveBtn.textContent = t('saveConfig');
   }
 }
 
@@ -203,13 +111,13 @@ async function testConnection() {
   const apiKey = apiKeyInput.value.trim();
   
   if (!apiKey) {
-    showMessage(i18n.t('enterApiKeyFirst'), 'error');
+    showMessage(t('enterApiKeyFirst'), 'error');
     return;
   }
 
   try {
     testBtn.disabled = true;
-    testBtn.innerHTML = `<span class="spinner"></span>${i18n.t('testing')}`;
+    testBtn.innerHTML = `<span class="spinner"></span>${t('testing')}`;
     
     // Temporarily set the API key for testing
     const originalKey = aiService.apiKey;
@@ -225,20 +133,20 @@ async function testConnection() {
     // Restore original key
     aiService.apiKey = originalKey;
     
-    updateStatus('configured', i18n.t('statusConnected'));
-    showMessage(i18n.t('connectionTestSuccess'), 'success');
+    updateStatus('configured', t('statusConnected'));
+    showMessage(t('connectionTestSuccess'), 'success');
   } catch (error) {
     console.error('Connection test failed:', error);
-    updateStatus('error', i18n.t('statusError'));
-    showMessage(i18n.t('connectionTestFailed') + ': ' + error.message, 'error');
+    updateStatus('error', t('statusError'));
+    showMessage(t('connectionTestFailed') + ': ' + error.message, 'error');
   } finally {
     testBtn.disabled = false;
-    testBtn.textContent = i18n.t('testConnection');
+    testBtn.textContent = t('testConnection');
   }
 }
 
 async function clearSettings() {
-  if (!confirm(i18n.t('confirmClearConfig'))) {
+  if (!confirm(t('confirmClearConfig'))) {
     return;
   }
 
@@ -246,11 +154,11 @@ async function clearSettings() {
     clearBtn.disabled = true;
     await aiService.clearApiKey();
     apiKeyInput.value = '';
-    updateStatus('unconfigured', i18n.t('statusUnconfigured'));
-    showMessage(i18n.t('configCleared'), 'info');
+    updateStatus('unconfigured', t('statusUnconfigured'));
+    showMessage(t('configCleared'), 'info');
   } catch (error) {
     console.error('Failed to clear settings:', error);
-    showMessage(i18n.t('clearFailed') + ': ' + error.message, 'error');
+    showMessage(t('clearFailed') + ': ' + error.message, 'error');
   } finally {
     clearBtn.disabled = false;
   }

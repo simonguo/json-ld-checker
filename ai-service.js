@@ -6,6 +6,11 @@ class AIService {
     this.model = 'gpt-4o-mini';
   }
 
+  isEnglish() {
+    const lang = chrome.i18n.getUILanguage ? chrome.i18n.getUILanguage() : 'en';
+    return !String(lang).toLowerCase().startsWith('zh');
+  }
+
   // Initialize and load API key from storage
   async initialize() {
     try {
@@ -58,7 +63,7 @@ class AIService {
   // Make API call to OpenAI
   async callOpenAI(messages, temperature = 0.7) {
     if (!this.apiKey) {
-      const errorMsg = typeof i18n !== 'undefined' && i18n.getLocale() === 'en' 
+      const errorMsg = this.isEnglish()
         ? 'OpenAI API Key not configured. Please configure it in settings.'
         : 'OpenAI API Key 未配置，请先在设置中配置';
       throw new Error(errorMsg);
@@ -81,7 +86,7 @@ class AIService {
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        const isEnglish = typeof i18n !== 'undefined' && i18n.getLocale() === 'en';
+        const isEnglish = this.isEnglish();
         if (response.status === 401) {
           throw new Error(isEnglish ? 'Invalid API Key. Please check your configuration.' : 'API Key 无效，请检查配置');
         } else if (response.status === 429) {
@@ -95,7 +100,7 @@ class AIService {
       return data.choices[0].message.content;
     } catch (error) {
       if (error.message.includes('Failed to fetch')) {
-        const isEnglish = typeof i18n !== 'undefined' && i18n.getLocale() === 'en';
+        const isEnglish = this.isEnglish();
         throw new Error(isEnglish ? 'Network connection failed. Please check your network settings.' : '网络连接失败，请检查网络设置');
       }
       throw error;
@@ -104,7 +109,7 @@ class AIService {
 
   // Check JSON-LD for issues
   async checkJsonLd(jsonLdData, pageUrl = '') {
-    const isEnglish = typeof i18n !== 'undefined' && i18n.getLocale() === 'en';
+    const isEnglish = this.isEnglish();
     
     const systemPrompt = isEnglish 
       ? `You are a JSON-LD and Schema.org structured data expert. Your task is to check JSON-LD data for issues, including:
@@ -166,7 +171,7 @@ ${JSON.stringify(jsonLdData, null, 2)}
 
   // Suggest JSON-LD for current page
   async suggestJsonLd(pageInfo) {
-    const isEnglish = typeof i18n !== 'undefined' && i18n.getLocale() === 'en';
+    const isEnglish = this.isEnglish();
     
     const systemPrompt = isEnglish
       ? `You are a JSON-LD and Schema.org structured data expert. Your task is to suggest appropriate JSON-LD structured data based on webpage content.

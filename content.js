@@ -16,7 +16,7 @@ function extractJsonLd() {
     } catch (error) {
       jsonLdData.push({
         index: index + 1,
-        error: `${i18n.t('parseError')}: ${error.message}`,
+        error: `${chrome.i18n.getMessage('parseError')}: ${error.message}`,
         raw: script.textContent
       });
     }

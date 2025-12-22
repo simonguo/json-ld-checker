@@ -5,32 +5,18 @@ let currentPageInfo = null;
 const validator = new JsonLdValidator();
 const aiService = new AIService();
 
+function t(key, substitutions) {
+  return chrome.i18n.getMessage(key, substitutions);
+}
+
 // Initialize
 document.addEventListener('DOMContentLoaded', async () => {
-  // Wait for i18n to load
-  await i18n.loadLocale();
-  
-  // Set HTML lang attribute
-  document.documentElement.lang = i18n.getLocale() === 'zh' ? 'zh-CN' : 'en';
-  
-  // Update static UI text
+  // Localize static DOM and set initial dynamic text
+  localizeHtmlPage(document);
   updateUIText();
   
   loadJsonLdData();
   setupEventListeners();
-  
-  // Listen for language changes
-  window.addEventListener('languageChanged', () => {
-    document.documentElement.lang = i18n.getLocale() === 'zh' ? 'zh-CN' : 'en';
-    updateUIText();
-    // Refresh current view if data is loaded
-    if (currentJsonLdData && currentJsonLdData.found) {
-      displayJsonLdData(currentJsonLdData);
-      updateStatus(currentJsonLdData);
-    } else {
-      showEmptyState();
-    }
-  });
 });
 
 function updateUIText() {
@@ -54,28 +40,28 @@ function updateUIText() {
         const existingText = textNodes.find(node => node.textContent.trim());
         
         if (existingText) {
-          existingText.textContent = ' ' + i18n.t(tabs[tabName]);
+          existingText.textContent = ' ' + t(tabs[tabName]);
         } else {
           // Remove any empty text nodes
           textNodes.forEach(node => node.remove());
           // Add new text node with proper spacing
-          btn.appendChild(document.createTextNode(' ' + i18n.t(tabs[tabName])));
+          btn.appendChild(document.createTextNode(' ' + t(tabs[tabName])));
         }
       } else {
         // For tabs without SVG, just set text content
-        btn.textContent = i18n.t(tabs[tabName]);
+        btn.textContent = t(tabs[tabName]);
       }
     }
   });
   
   // Update button titles
-  document.getElementById('settingsBtn').title = i18n.t('settings');
-  document.getElementById('refreshBtn').title = i18n.t('refresh');
+  document.getElementById('settingsBtn').title = t('settings');
+  document.getElementById('refreshBtn').title = t('refresh');
   
   // Update initial loading text if present
   const loadingText = document.querySelector('#content .loading p');
   if (loadingText && !loadingText.textContent) {
-    loadingText.textContent = i18n.t('loading');
+    loadingText.textContent = t('loading');
   }
 }
 
@@ -112,7 +98,7 @@ async function loadJsonLdData() {
     container.style.display = 'none';
   }
   content.style.display = 'block';
-  content.innerHTML = `<div class="loading"><div class="spinner"></div><p>${i18n.t('loading')}</p></div>`;
+  content.innerHTML = `<div class="loading"><div class="spinner"></div><p>${t('loading')}</p></div>`;
   status.textContent = '';
   status.className = 'status';
 
@@ -121,7 +107,7 @@ async function loadJsonLdData() {
     const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
     
     if (!tab) {
-      showError(i18n.t('unableToGetCurrentTab'));
+      showError(t('unableToGetCurrentTab'));
       return;
     }
 
@@ -165,10 +151,10 @@ function updateStatus(data) {
   
   if (data.found) {
     status.className = 'status success';
-    status.textContent = `✓ ${i18n.t('foundJsonLd', {count: data.count})}`;
+    status.textContent = `✓ ${t('foundJsonLd', [String(data.count)])}`;
   } else {
     status.className = 'status warning';
-    status.textContent = `⚠ ${i18n.t('noJsonLd')}`;
+    status.textContent = `⚠ ${t('noJsonLd')}`;
   }
 }
 
@@ -180,7 +166,7 @@ function displayJsonLdData(data) {
   
   if (!container) {
     console.error('jsonLdContainer not found!');
-    showError(i18n.t('interfaceElementNotFound'));
+    showError(t('interfaceElementNotFound'));
     return;
   }
   
@@ -209,7 +195,7 @@ function displayJsonLdData(data) {
     displaySelectedJsonLd(data.data[currentSelectedIndex]);
   } else {
     console.error('No data at index:', currentSelectedIndex);
-    showError(i18n.t('dataIndexError'));
+    showError(t('dataIndexError'));
   }
 }
 
@@ -224,10 +210,10 @@ function addJsonLdSelector(data) {
   const selector = document.createElement('div');
   selector.className = 'jsonld-selector';
   selector.innerHTML = `
-    <label>${i18n.t('selectJsonLd', {count: data.count})}:</label>
+    <label>${t('selectJsonLd', [String(data.count)])}:</label>
     <select id="jsonLdSelect">
       ${data.data.map((item, index) => {
-        const type = item.data?.['@type'] || i18n.t('unknownType');
+        const type = item.data?.['@type'] || t('unknownType');
         const typeStr = Array.isArray(type) ? type.join(', ') : type;
         return `<option value="${index}" ${index === currentSelectedIndex ? 'selected' : ''}>
           #${index + 1} - ${typeStr}
@@ -262,10 +248,31 @@ function displaySelectedJsonLd(item) {
 
 function renderTreeView(data) {
   const treeView = document.getElementById('treeView');
-  treeView.innerHTML = '<div class="tree"></div>';
+  treeView.innerHTML = `
+    <div class="tree-search-container">
+      <div class="tree-search-box">
+        <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="8"/>
+          <path d="m21 21-4.35-4.35"/>
+        </svg>
+        <input type="text" id="treeSearchInput" class="tree-search-input" placeholder="${t('searchPlaceholder')}" />
+        <button id="clearSearchBtn" class="clear-search-btn" title="${t('clearSearch')}" style="display: none;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"/>
+            <line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      </div>
+      <div id="searchResultsCount" class="search-results-count" style="display: none;"></div>
+    </div>
+    <div class="tree"></div>
+  `;
   const tree = treeView.querySelector('.tree');
   
   renderTreeNode(tree, data, 'root');
+  
+  // Setup search functionality
+  setupTreeSearch();
 }
 
 function renderTreeNode(container, data, key, level = 0) {
@@ -358,11 +365,11 @@ function renderValidationView(data) {
   // Summary
   html += '<h3>';
   if (results.isValid) {
-    html += `✓ ${i18n.t('validationPassed')}`;
+    html += `✓ ${t('validationPassed')}`;
   } else {
-    html += `✗ ${i18n.t('validationFailed')}`;
+    html += `✗ ${t('validationFailed')}`;
   }
-  html += `<span class="tree-type">(${summary.errors} ${i18n.t('errors')}, ${summary.warnings} ${i18n.t('warnings')}, ${summary.suggestions} ${i18n.t('suggestions')})</span>`;
+  html += `<span class="tree-type">(${summary.errors} ${t('errors')}, ${summary.warnings} ${t('warnings')}, ${summary.suggestions} ${t('suggestions')})</span>`;
   html += '</h3>';
   
   // Errors
@@ -372,11 +379,11 @@ function renderValidationView(data) {
       html += `
         <div class="validation-item error">
           <div class="validation-title">
-            <span class="badge error">${i18n.t('error')}</span>
+            <span class="badge error">${t('error')}</span>
             ${error.title}
           </div>
           <div class="validation-message">${error.message}</div>
-          ${error.suggestion ? `<div class="validation-suggestion"><strong>${i18n.t('suggestionLabel')}:</strong> ${error.suggestion}</div>` : ''}
+          ${error.suggestion ? `<div class="validation-suggestion"><strong>${t('suggestionLabel')}:</strong> ${error.suggestion}</div>` : ''}
         </div>
       `;
     });
@@ -390,11 +397,11 @@ function renderValidationView(data) {
       html += `
         <div class="validation-item warning">
           <div class="validation-title">
-            <span class="badge warning">${i18n.t('warning')}</span>
+            <span class="badge warning">${t('warning')}</span>
             ${warning.title}
           </div>
           <div class="validation-message">${warning.message}</div>
-          ${warning.suggestion ? `<div class="validation-suggestion"><strong>${i18n.t('suggestionLabel')}:</strong> ${warning.suggestion}</div>` : ''}
+          ${warning.suggestion ? `<div class="validation-suggestion"><strong>${t('suggestionLabel')}:</strong> ${warning.suggestion}</div>` : ''}
         </div>
       `;
     });
@@ -408,11 +415,11 @@ function renderValidationView(data) {
       html += `
         <div class="validation-item info">
           <div class="validation-title">
-            <span class="badge info">${i18n.t('suggestion')}</span>
+            <span class="badge info">${t('suggestion')}</span>
             ${suggestion.title}
           </div>
           <div class="validation-message">${suggestion.message}</div>
-          ${suggestion.suggestion ? `<div class="validation-suggestion"><strong>${i18n.t('description')}:</strong> ${suggestion.suggestion}</div>` : ''}
+          ${suggestion.suggestion ? `<div class="validation-suggestion"><strong>${t('description')}:</strong> ${suggestion.suggestion}</div>` : ''}
         </div>
       `;
     });
@@ -426,7 +433,7 @@ function renderValidationView(data) {
       html += `
         <div class="validation-item success">
           <div class="validation-title">
-            <span class="badge success">${i18n.t('info')}</span>
+            <span class="badge success">${t('info')}</span>
             ${info.title}
           </div>
           <div class="validation-message">${info.message}</div>
@@ -471,7 +478,7 @@ function showEmptyState() {
   const container = document.getElementById('jsonLdContainer');
   
   status.className = 'status warning';
-  status.innerHTML = `⚠ ${i18n.t('noJsonLd')} <span style="color: #667eea; font-weight: 500;">· ${i18n.t('canUseAiSuggest')}</span>`;
+  status.innerHTML = `⚠ ${t('noJsonLd')} <span style="color: #667eea; font-weight: 500;">· ${t('canUseAiSuggest')}</span>`;
   
   // Show container with AI Suggest tab for empty state
   if (container) {
@@ -487,11 +494,11 @@ function showEmptyState() {
           <line x1="12" y1="18" x2="12" y2="12"/>
           <line x1="9" y1="15" x2="15" y2="15"/>
         </svg>
-        <h3>${i18n.t('noJsonLdFound')}</h3>
-        <p>${i18n.t('noJsonLdOnPage')}</p>
-        <p class="hint">💡 ${i18n.t('tryAiSuggest')}</p>
+        <h3>${t('noJsonLdFound')}</h3>
+        <p>${t('noJsonLdOnPage')}</p>
+        <p class="hint">💡 ${t('tryAiSuggest')}</p>
         <button class="btn btn-primary jump-to-ai-suggest" style="margin-top: 16px;">
-          ${i18n.t('useAiSuggest')}
+          ${t('useAiSuggest')}
         </button>
       </div>
     `;
@@ -508,13 +515,13 @@ function showEmptyState() {
     
     document.getElementById('rawView').innerHTML = `
       <div class="empty-state-inline">
-        <p>${i18n.t('noJsonLdData')}</p>
+        <p>${t('noJsonLdData')}</p>
       </div>
     `;
     
     document.getElementById('validationView').innerHTML = `
       <div class="empty-state-inline">
-        <p>${i18n.t('noJsonLdToValidate')}</p>
+        <p>${t('noJsonLdToValidate')}</p>
       </div>
     `;
     
@@ -524,11 +531,11 @@ function showEmptyState() {
           <path d="M12 2L2 7l10 5 10-5-10-5z"/>
           <path d="M2 17l10 5 10-5M2 12l10 5 10-5"/>
         </svg>
-        <h3>${i18n.t('noJsonLdFound')}</h3>
-        <p>${i18n.t('noJsonLdToCheck')}</p>
-        <p class="hint">💡 ${i18n.t('tryAiSuggest')}</p>
+        <h3>${t('noJsonLdFound')}</h3>
+        <p>${t('noJsonLdToCheck')}</p>
+        <p class="hint">💡 ${t('tryAiSuggest')}</p>
         <button class="btn btn-primary jump-to-ai-suggest-2" style="margin-top: 16px;">
-          ${i18n.t('useAiSuggest')}
+          ${t('useAiSuggest')}
         </button>
       </div>
     `;
@@ -562,7 +569,7 @@ function showError(message) {
   content.style.display = 'block';
   
   status.className = 'status error';
-  status.textContent = `✗ ${i18n.t('loadFailed')}`;
+  status.textContent = `✗ ${t('loadFailed')}`;
   
   content.innerHTML = `
     <div class="empty-state">
@@ -571,7 +578,7 @@ function showError(message) {
         <line x1="15" y1="9" x2="9" y2="15"/>
         <line x1="9" y1="9" x2="15" y2="15"/>
       </svg>
-      <h3>${i18n.t('errorOccurred')}</h3>
+      <h3>${t('errorOccurred')}</h3>
       <p>${message}</p>
     </div>
   `;
@@ -589,10 +596,10 @@ async function renderAICheckView() {
           <path d="M12 2L2 7l10 5 10-5-10-5z"/>
           <path d="M2 17l10 5 10-5M2 12l10 5 10-5"/>
         </svg>
-        <h3>${i18n.t('aiCheckFeature')}</h3>
-        <p>${i18n.t('aiCheckDescription')}</p>
+        <h3>${t('aiCheckFeature')}</h3>
+        <p>${t('aiCheckDescription')}</p>
         <button class="btn btn-primary open-settings-btn">
-          ${i18n.t('configureApiKey')}
+          ${t('configureApiKey')}
         </button>
       </div>
     `;
@@ -618,9 +625,9 @@ async function renderAICheckView() {
           <line x1="12" y1="18" x2="12" y2="12"/>
           <line x1="9" y1="15" x2="15" y2="15"/>
         </svg>
-        <h3>${i18n.t('noJsonLdFound')}</h3>
-        <p>${i18n.t('noJsonLdToCheck')}</p>
-        <p>${i18n.t('youCanUseAiSuggest')}</p>
+        <h3>${t('noJsonLdFound')}</h3>
+        <p>${t('noJsonLdToCheck')}</p>
+        <p>${t('youCanUseAiSuggest')}</p>
       </div>
     `;
     return;
@@ -630,8 +637,8 @@ async function renderAICheckView() {
   aiCheckView.innerHTML = `
     <div class="ai-loading">
       <div class="spinner"></div>
-      <p>${i18n.t('aiAnalyzing')}</p>
-      <p class="ai-loading-tip">${i18n.t('mayTakeFewSeconds')}</p>
+      <p>${t('aiAnalyzing')}</p>
+      <p class="ai-loading-tip">${t('mayTakeFewSeconds')}</p>
     </div>
   `;
 
@@ -642,8 +649,8 @@ async function renderAICheckView() {
     aiCheckView.innerHTML = `
       <div class="ai-result">
         <div class="ai-result-header">
-          <h3>${i18n.t('aiCheckResults')}</h3>
-          <button class="btn-secondary btn-small recheck-ai-btn">${i18n.t('recheckAi')}</button>
+          <h3>${t('aiCheckResults')}</h3>
+          <button class="btn-secondary btn-small recheck-ai-btn">${t('recheckAi')}</button>
         </div>
         <div class="ai-result-content markdown-content">
           ${formatMarkdown(result)}
@@ -672,9 +679,9 @@ async function renderAICheckView() {
           <line x1="12" y1="8" x2="12" y2="12"/>
           <line x1="12" y1="16" x2="12.01" y2="16"/>
         </svg>
-        <h3>${i18n.t('aiCheckFailed')}</h3>
+        <h3>${t('aiCheckFailed')}</h3>
         <p class="error-message">${error.message}</p>
-        <button class="btn btn-primary retry-ai-check-btn">${i18n.t('retry')}</button>
+        <button class="btn btn-primary retry-ai-check-btn">${t('retry')}</button>
       </div>
     `;
     
@@ -701,10 +708,10 @@ async function renderAISuggestView() {
         <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
         </svg>
-        <h3>${i18n.t('aiSuggestFeature')}</h3>
-        <p>${i18n.t('aiSuggestDescription')}</p>
+        <h3>${t('aiSuggestFeature')}</h3>
+        <p>${t('aiSuggestDescription')}</p>
         <button class="btn btn-primary open-settings-btn-suggest">
-          ${i18n.t('configureApiKey')}
+          ${t('configureApiKey')}
         </button>
       </div>
     `;
@@ -724,8 +731,8 @@ async function renderAISuggestView() {
   if (!currentPageInfo) {
     aiSuggestView.innerHTML = `
       <div class="ai-placeholder">
-        <h3>${i18n.t('unableToGetPageInfo')}</h3>
-        <p>${i18n.t('pleaseRefresh')}</p>
+        <h3>${t('unableToGetPageInfo')}</h3>
+        <p>${t('pleaseRefresh')}</p>
       </div>
     `;
     return;
@@ -735,8 +742,8 @@ async function renderAISuggestView() {
   aiSuggestView.innerHTML = `
     <div class="ai-loading">
       <div class="spinner"></div>
-      <p>${i18n.t('aiAnalyzingPage')}</p>
-      <p class="ai-loading-tip">${i18n.t('mayTakeFewSeconds')}</p>
+      <p>${t('aiAnalyzingPage')}</p>
+      <p class="ai-loading-tip">${t('mayTakeFewSeconds')}</p>
     </div>
   `;
 
@@ -754,10 +761,10 @@ async function renderAISuggestView() {
     if (jsonLdCodes.length > 0) {
       copyButtonsHtml = `
         <div class="ai-code-actions">
-          <p class="ai-code-hint">💡 ${i18n.t('detectedCodeBlocks', {count: jsonLdCodes.length})}</p>
+          <p class="ai-code-hint">💡 ${t('detectedCodeBlocks', [String(jsonLdCodes.length)])}</p>
           ${jsonLdCodes.map((code, index) => `
             <button class="btn-secondary btn-small" onclick="copyJsonLdCode(${index})">
-              ${i18n.t('copyCodeBlock', {index: index + 1})}
+              ${t('copyCodeBlock', [String(index + 1)])}
             </button>
           `).join('')}
         </div>
@@ -767,8 +774,8 @@ async function renderAISuggestView() {
     aiSuggestView.innerHTML = `
       <div class="ai-result">
         <div class="ai-result-header">
-          <h3>${i18n.t('aiSuggestResults')}</h3>
-          <button class="btn-secondary btn-small regenerate-ai-suggest-btn">${i18n.t('regenerate')}</button>
+          <h3>${t('aiSuggestResults')}</h3>
+          <button class="btn-secondary btn-small regenerate-ai-suggest-btn">${t('regenerate')}</button>
         </div>
         ${copyButtonsHtml}
         <div class="ai-result-content markdown-content">
@@ -800,9 +807,9 @@ async function renderAISuggestView() {
           <line x1="12" y1="8" x2="12" y2="12"/>
           <line x1="12" y1="16" x2="12.01" y2="16"/>
         </svg>
-        <h3>${i18n.t('aiSuggestFailed')}</h3>
+        <h3>${t('aiSuggestFailed')}</h3>
         <p class="error-message">${error.message}</p>
-        <button class="btn btn-primary retry-ai-suggest-btn">${i18n.t('retry')}</button>
+        <button class="btn btn-primary retry-ai-suggest-btn">${t('retry')}</button>
       </div>
     `;
     
@@ -828,7 +835,7 @@ function copyJsonLdCode(index) {
       // Show success feedback
       const btn = event.target;
       const originalText = btn.textContent;
-      btn.textContent = `✓ ${i18n.t('copied')}`;
+      btn.textContent = `✓ ${t('copied')}`;
       btn.style.background = '#28a745';
       btn.style.color = 'white';
       
@@ -839,7 +846,7 @@ function copyJsonLdCode(index) {
       }, 2000);
     }).catch(err => {
       console.error('Copy failed:', err);
-      alert(i18n.t('copyFailed'));
+      alert(t('copyFailed'));
     });
   }
 }
@@ -883,4 +890,135 @@ function formatMarkdown(text) {
   html = html.replace(/(<\/[hup]>)<\/p>/g, '$1');
   
   return html;
+}
+
+// Tree search functionality
+function setupTreeSearch() {
+  const searchInput = document.getElementById('treeSearchInput');
+  const clearBtn = document.getElementById('clearSearchBtn');
+  const resultsCount = document.getElementById('searchResultsCount');
+  
+  if (!searchInput || !clearBtn || !resultsCount) return;
+  
+  let searchTimeout;
+  
+  searchInput.addEventListener('input', (e) => {
+    clearTimeout(searchTimeout);
+    const query = e.target.value.trim();
+    
+    if (query) {
+      clearBtn.style.display = 'block';
+      searchTimeout = setTimeout(() => performTreeSearch(query), 300);
+    } else {
+      clearBtn.style.display = 'none';
+      clearTreeSearch();
+    }
+  });
+  
+  clearBtn.addEventListener('click', () => {
+    searchInput.value = '';
+    clearBtn.style.display = 'none';
+    clearTreeSearch();
+    searchInput.focus();
+  });
+  
+  searchInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      searchInput.value = '';
+      clearBtn.style.display = 'none';
+      clearTreeSearch();
+    }
+  });
+}
+
+function performTreeSearch(query) {
+  const tree = document.querySelector('.tree');
+  const resultsCount = document.getElementById('searchResultsCount');
+  if (!tree || !resultsCount) return;
+  
+  const lowerQuery = query.toLowerCase();
+  let matchCount = 0;
+  
+  // Remove previous highlights
+  tree.querySelectorAll('.tree-node-header').forEach(header => {
+    header.classList.remove('search-highlight', 'search-dim');
+  });
+  
+  // Search and highlight
+  tree.querySelectorAll('.tree-node-header').forEach(header => {
+    const keySpan = header.querySelector('.tree-key');
+    const valueSpan = header.querySelector('.tree-value');
+    
+    if (!keySpan) return;
+    
+    const keyText = keySpan.textContent.toLowerCase();
+    const valueText = valueSpan ? valueSpan.textContent.toLowerCase() : '';
+    
+    const isMatch = keyText.includes(lowerQuery) || valueText.includes(lowerQuery);
+    
+    if (isMatch) {
+      header.classList.add('search-highlight');
+      matchCount++;
+      
+      // Expand parent nodes - fixed to prevent infinite loop
+      let currentNode = header.closest('.tree-node');
+      let maxDepth = 100; // Safety limit to prevent infinite loop
+      let depth = 0;
+      
+      while (currentNode && depth < maxDepth) {
+        depth++;
+        const parentChildren = currentNode.parentElement;
+        
+        // Check if this is a tree-children container
+        if (!parentChildren || !parentChildren.classList.contains('tree-children')) {
+          break;
+        }
+        
+        // Expand this children container
+        parentChildren.classList.remove('collapsed');
+        
+        // Find and expand the toggle in the parent header
+        const parentNode = parentChildren.previousElementSibling;
+        if (parentNode && parentNode.classList.contains('tree-node-header')) {
+          const toggle = parentNode.querySelector('.tree-toggle');
+          if (toggle) {
+            toggle.classList.remove('collapsed');
+            toggle.classList.add('expanded');
+          }
+        }
+        
+        // Move to the next parent level
+        currentNode = parentChildren.closest('.tree-node');
+        if (currentNode) {
+          currentNode = currentNode.parentElement?.closest('.tree-node');
+        }
+      }
+    } else {
+      header.classList.add('search-dim');
+    }
+  });
+  
+  // Show results count
+  if (matchCount > 0) {
+    resultsCount.textContent = t('searchResults', [String(matchCount)]);
+    resultsCount.style.display = 'block';
+  } else {
+    resultsCount.textContent = t('noSearchResults');
+    resultsCount.style.display = 'block';
+  }
+}
+
+function clearTreeSearch() {
+  const tree = document.querySelector('.tree');
+  const resultsCount = document.getElementById('searchResultsCount');
+  
+  if (tree) {
+    tree.querySelectorAll('.tree-node-header').forEach(header => {
+      header.classList.remove('search-highlight', 'search-dim');
+    });
+  }
+  
+  if (resultsCount) {
+    resultsCount.style.display = 'none';
+  }
 }
