@@ -1,9 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "__MSG_extensionName__",
-  "version": "1.3.0",
-  "default_locale": "en",
-  "description": "__MSG_extensionDescription__",
+  "name": "JSON-LD Checker",
+  "version": "2.0.0",
+  "description": "Check and validate JSON-LD structured data on webpages",
   "permissions": [
     "activeTab",
     "sidePanel",
@@ -14,12 +13,13 @@
     "<all_urls>"
   ],
   "background": {
-    "service_worker": "background.js"
+    "service_worker": "src/background.ts",
+    "type": "module"
   },
   "content_scripts": [
     {
       "matches": ["<all_urls>"],
-      "js": ["content.js"],
+      "js": ["src/content.ts"],
       "run_at": "document_idle"
     }
   ],
@@ -30,16 +30,24 @@
       "48": "icons/png/icon-inactive-48.png",
       "128": "icons/png/icon-inactive-128.png"
     },
-    "default_title": "__MSG_actionTitle__"
+    "default_title": "JSON-LD Checker"
   },
   "side_panel": {
-    "default_path": "sidepanel.html"
+    "default_path": "src/pages/sidepanel/index.html"
   },
-  "options_page": "settings.html",
+  "options_page": "src/pages/options/index.html",
   "icons": {
     "16": "icons/png/icon-16.png",
     "32": "icons/png/icon-32.png",
     "48": "icons/png/icon-48.png",
     "128": "icons/png/icon-128.png"
-  }
+  },
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "icons/png/*.png"
+      ],
+      "matches": ["<all_urls>"]
+    }
+  ]
 }

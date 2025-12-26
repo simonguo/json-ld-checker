@@ -1,19 +1,32 @@
 {
   "name": "json-ld-checker",
-  "version": "1.1.0",
-  "description": "Browser extension for checking and validating JSON-LD structured data",
+  "version": "2.0.0",
+  "type": "module",
+  "private": true,
   "scripts": {
-    "test": "echo \"Open test-page.html to run tests\""
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "type-check": "tsc --noEmit"
   },
-  "keywords": [
-    "json-ld",
-    "schema.org",
-    "seo",
-    "structured-data",
-    "chrome-extension",
-    "browser-extension",
-    "validator"
-  ],
-  "author": "simonguo",
-  "license": "MIT"
+  "dependencies": {
+    "lucide-react": "^0.460.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-json-tree": "^0.20.0",
+    "react-markdown": "^10.1.0"
+  },
+  "devDependencies": {
+    "@crxjs/vite-plugin": "^2.0.0-beta.23",
+    "@types/chrome": "^0.0.270",
+    "@types/node": "^20.11.5",
+    "@types/react": "^18.2.48",
+    "@types/react-dom": "^18.2.18",
+    "@vitejs/plugin-react": "^4.2.1",
+    "autoprefixer": "^10.4.17",
+    "postcss": "^8.4.33",
+    "tailwindcss": "^3.4.1",
+    "typescript": "^5.3.3",
+    "vite": "^5.0.12"
+  }
 }

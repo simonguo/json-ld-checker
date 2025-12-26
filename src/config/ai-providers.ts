@@ -1,5 +1,24 @@
-// AI Provider Configurations
-const AI_PROVIDERS = {
+export type ProviderKey =
+  | 'openai'
+  | 'anthropic'
+  | 'google'
+  | 'azure'
+  | 'openrouter'
+  | 'custom';
+
+export interface AIModel {
+  id: string;
+  name: string;
+}
+
+export interface AIProvider {
+  name: string;
+  models: AIModel[];
+  apiKeyPrefix?: string;
+  endpoint?: string;
+}
+
+export const AI_PROVIDERS: Record<ProviderKey, AIProvider> = {
   openai: {
     name: 'OpenAI',
     apiKeyPrefix: 'sk-',
@@ -70,7 +89,14 @@ const AI_PROVIDERS = {
   },
 };
 
-// Export for use in other scripts
-if (typeof module !== 'undefined' && module.exports) {
-  module.exports = { AI_PROVIDERS };
-}
+export const getProviderApiKeyLink = (provider: ProviderKey): string => {
+  const links: Record<ProviderKey, string> = {
+    openai: 'https://platform.openai.com/api-keys',
+    anthropic: 'https://console.anthropic.com/settings/keys',
+    google: 'https://aistudio.google.com/app/apikey',
+    azure: 'https://portal.azure.com/',
+    openrouter: 'https://openrouter.ai/keys',
+    custom: '#',
+  };
+  return links[provider] || '#';
+};
