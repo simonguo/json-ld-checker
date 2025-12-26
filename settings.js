@@ -6,7 +6,14 @@ function t(key, substitutions) {
 }
 
 // DOM elements
+const providerSelect = document.getElementById('provider');
+const modelSelect = document.getElementById('model');
 const apiKeyInput = document.getElementById('apiKey');
+const endpointInput = document.getElementById('endpoint');
+const azureEndpointInput = document.getElementById('azureEndpoint');
+const azureDeploymentInput = document.getElementById('azureDeployment');
+const endpointGroup = document.getElementById('endpointGroup');
+const azureGroup = document.getElementById('azureGroup');
 const toggleVisibilityBtn = document.getElementById('toggleVisibility');
 const eyeIcon = document.getElementById('eyeIcon');
 const apiStatus = document.getElementById('apiStatus');
@@ -14,6 +21,7 @@ const saveBtn = document.getElementById('saveBtn');
 const testBtn = document.getElementById('testBtn');
 const clearBtn = document.getElementById('clearBtn');
 const messageDiv = document.getElementById('message');
+const getApiKeyLink = document.getElementById('getApiKeyLink');
 
 // Initialize
 document.addEventListener('DOMContentLoaded', async () => {
@@ -21,11 +29,72 @@ document.addEventListener('DOMContentLoaded', async () => {
   localizeHtmlPage(document);
   document.title = t('settingsTitle') + ' - JSON-LD Checker';
 
+  // Populate provider dropdown
+  populateProviders();
+  
   await loadSettings();
   setupEventListeners();
 });
 
+function populateProviders() {
+  providerSelect.innerHTML = '';
+  Object.entries(AI_PROVIDERS).forEach(([key, provider]) => {
+    const option = document.createElement('option');
+    option.value = key;
+    option.textContent = provider.name;
+    providerSelect.appendChild(option);
+  });
+}
+
+function populateModels(provider) {
+  modelSelect.innerHTML = '';
+  const models = AI_PROVIDERS[provider]?.models || [];
+  models.forEach(model => {
+    const option = document.createElement('option');
+    option.value = model.id;
+    option.textContent = model.name;
+    modelSelect.appendChild(option);
+  });
+}
+
+function updateProviderUI(provider) {
+  // Show/hide endpoint fields based on provider
+  const showEndpoint = ['openai', 'anthropic', 'google', 'openrouter', 'custom'].includes(provider);
+  const showAzure = provider === 'azure';
+  
+  endpointGroup.style.display = showEndpoint ? 'block' : 'none';
+  azureGroup.style.display = showAzure ? 'block' : 'none';
+  
+  // Update API key link
+  const links = {
+    openai: 'https://platform.openai.com/api-keys',
+    anthropic: 'https://console.anthropic.com/settings/keys',
+    google: 'https://aistudio.google.com/app/apikey',
+    azure: 'https://portal.azure.com/',
+    openrouter: 'https://openrouter.ai/keys',
+    custom: '#'
+  };
+  getApiKeyLink.href = links[provider] || '#';
+  
+  // Update placeholder
+  const prefix = AI_PROVIDERS[provider]?.apiKeyPrefix || '';
+  apiKeyInput.placeholder = prefix ? `${prefix}...` : 'API Key';
+}
+
 function setupEventListeners() {
+  // Provider change
+  providerSelect.addEventListener('change', () => {
+    const provider = providerSelect.value;
+    populateModels(provider);
+    updateProviderUI(provider);
+    
+    // Set default endpoint if available
+    const providerConfig = AI_PROVIDERS[provider];
+    if (providerConfig?.endpoint) {
+      endpointInput.value = providerConfig.endpoint;
+    }
+  });
+  
   // Toggle password visibility
   toggleVisibilityBtn.addEventListener('click', () => {
     const type = apiKeyInput.type === 'password' ? 'text' : 'password';
@@ -65,13 +134,27 @@ async function loadSettings() {
   try {
     const hasKey = await aiService.initialize();
     
+    // Set provider
+    providerSelect.value = aiService.provider || 'openai';
+    
+    // Populate and set model
+    populateModels(aiService.provider);
+    modelSelect.value = aiService.model || AI_PROVIDERS[aiService.provider]?.models[0]?.id || '';
+    
+    // Update UI
+    updateProviderUI(aiService.provider);
+    
     if (hasKey) {
-      const key = await aiService.getApiKey();
-      apiKeyInput.value = key;
+      apiKeyInput.value = aiService.apiKey;
       updateStatus('configured', t('statusConfigured'));
     } else {
       updateStatus('unconfigured', t('statusUnconfigured'));
     }
+    
+    // Set endpoints
+    endpointInput.value = aiService.endpoint || '';
+    azureEndpointInput.value = aiService.azureEndpoint || '';
+    azureDeploymentInput.value = aiService.azureDeployment || '';
   } catch (error) {
     console.error('Failed to load settings:', error);
     showMessage(t('loadSettingsFailed'), 'error');
@@ -79,15 +162,28 @@ async function loadSettings() {
 }
 
 async function saveSettings() {
+  const provider = providerSelect.value;
+  const model = modelSelect.value;
   const apiKey = apiKeyInput.value.trim();
+  const endpoint = endpointInput.value.trim();
+  const azureEndpoint = azureEndpointInput.value.trim();
+  const azureDeployment = azureDeploymentInput.value.trim();
   
   if (!apiKey) {
     showMessage(t('enterApiKey'), 'error');
     return;
   }
 
-  if (!apiKey.startsWith('sk-')) {
-    showMessage(t('invalidApiKeyFormat'), 'error');
+  // Validate API key format based on provider
+  const expectedPrefix = AI_PROVIDERS[provider]?.apiKeyPrefix;
+  if (expectedPrefix && !apiKey.startsWith(expectedPrefix)) {
+    showMessage(t('invalidApiKeyFormat').replace('{prefix}', expectedPrefix), 'error');
+    return;
+  }
+  
+  // Validate Azure fields
+  if (provider === 'azure' && (!azureEndpoint || !azureDeployment)) {
+    showMessage(t('azureFieldsRequired'), 'error');
     return;
   }
 
@@ -95,11 +191,19 @@ async function saveSettings() {
     saveBtn.disabled = true;
     saveBtn.innerHTML = `<span class="spinner"></span>${t('saving')}`;
     
-    await aiService.setApiKey(apiKey);
+    await aiService.setApiConfig({
+      provider,
+      model,
+      apiKey,
+      endpoint,
+      azureEndpoint,
+      azureDeployment
+    });
+    
     updateStatus('configured', t('statusConfigured'));
     showMessage(t('apiKeySaved'), 'success');
   } catch (error) {
-    console.error('Failed to save API key:', error);
+    console.error('Failed to save API config:', error);
     showMessage(t('saveFailed') + ': ' + error.message, 'error');
   } finally {
     saveBtn.disabled = false;
@@ -108,10 +212,20 @@ async function saveSettings() {
 }
 
 async function testConnection() {
+  const provider = providerSelect.value;
+  const model = modelSelect.value;
   const apiKey = apiKeyInput.value.trim();
+  const endpoint = endpointInput.value.trim();
+  const azureEndpoint = azureEndpointInput.value.trim();
+  const azureDeployment = azureDeploymentInput.value.trim();
   
   if (!apiKey) {
     showMessage(t('enterApiKeyFirst'), 'error');
+    return;
+  }
+  
+  if (provider === 'azure' && (!azureEndpoint || !azureDeployment)) {
+    showMessage(t('azureFieldsRequired'), 'error');
     return;
   }
 
@@ -119,9 +233,20 @@ async function testConnection() {
     testBtn.disabled = true;
     testBtn.innerHTML = `<span class="spinner"></span>${t('testing')}`;
     
-    // Temporarily set the API key for testing
+    // Temporarily set the configuration for testing
+    const originalProvider = aiService.provider;
+    const originalModel = aiService.model;
     const originalKey = aiService.apiKey;
+    const originalEndpoint = aiService.endpoint;
+    const originalAzureEndpoint = aiService.azureEndpoint;
+    const originalAzureDeployment = aiService.azureDeployment;
+    
+    aiService.provider = provider;
+    aiService.model = model;
     aiService.apiKey = apiKey;
+    aiService.endpoint = endpoint;
+    aiService.azureEndpoint = azureEndpoint;
+    aiService.azureDeployment = azureDeployment;
     
     // Make a simple test call
     const messages = [
@@ -130,8 +255,13 @@ async function testConnection() {
     
     await aiService.callOpenAI(messages, 0.1);
     
-    // Restore original key
+    // Restore original configuration
+    aiService.provider = originalProvider;
+    aiService.model = originalModel;
     aiService.apiKey = originalKey;
+    aiService.endpoint = originalEndpoint;
+    aiService.azureEndpoint = originalAzureEndpoint;
+    aiService.azureDeployment = originalAzureDeployment;
     
     updateStatus('configured', t('statusConnected'));
     showMessage(t('connectionTestSuccess'), 'success');
@@ -153,7 +283,16 @@ async function clearSettings() {
   try {
     clearBtn.disabled = true;
     await aiService.clearApiKey();
+    
+    // Reset form
+    providerSelect.value = 'openai';
+    populateModels('openai');
+    updateProviderUI('openai');
     apiKeyInput.value = '';
+    endpointInput.value = '';
+    azureEndpointInput.value = '';
+    azureDeploymentInput.value = '';
+    
     updateStatus('unconfigured', t('statusUnconfigured'));
     showMessage(t('configCleared'), 'info');
   } catch (error) {

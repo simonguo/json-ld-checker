@@ -18,6 +18,22 @@
         <p class="section-description" id="aiConfigDesc" data-i18n="aiConfigDescription"></p>
         
         <div class="form-group">
+          <label for="provider" id="providerLabel" data-i18n="providerLabel"></label>
+          <select id="provider" class="form-control">
+            <!-- Populated by JavaScript -->
+          </select>
+          <p class="help-text" id="providerHelp" data-i18n="providerHelp"></p>
+        </div>
+
+        <div class="form-group">
+          <label for="model" id="modelLabel" data-i18n="modelLabel"></label>
+          <select id="model" class="form-control">
+            <!-- Populated by JavaScript -->
+          </select>
+          <p class="help-text" id="modelHelp" data-i18n="modelHelp"></p>
+        </div>
+        
+        <div class="form-group">
           <label for="apiKey" id="apiKeyLabel" data-i18n="apiKeyLabel"></label>
           <div class="input-group">
             <input 
@@ -36,8 +52,41 @@
           </div>
           <p class="help-text">
             <span id="apiKeyHelp" data-i18n="apiKeyHelp"></span>
-            <a href="https://platform.openai.com/api-keys" target="_blank" id="getApiKeyLink" data-i18n="getApiKey"></a>
+            <a href="#" id="getApiKeyLink" target="_blank" data-i18n="getApiKey"></a>
           </p>
+        </div>
+
+        <div id="endpointGroup" class="form-group" style="display: none;">
+          <label for="endpoint" id="endpointLabel" data-i18n="endpointLabel"></label>
+          <input 
+            type="text" 
+            id="endpoint" 
+            class="form-control"
+            data-i18n-placeholder="endpointPlaceholder"
+            placeholder="https://api.example.com/v1/chat/completions"
+          >
+          <p class="help-text" id="endpointHelp" data-i18n="endpointHelp"></p>
+        </div>
+
+        <div id="azureGroup" style="display: none;">
+          <div class="form-group">
+            <label for="azureEndpoint" id="azureEndpointLabel" data-i18n="azureEndpointLabel"></label>
+            <input 
+              type="text" 
+              id="azureEndpoint" 
+              class="form-control"
+              placeholder="https://your-resource.openai.azure.com"
+            >
+          </div>
+          <div class="form-group">
+            <label for="azureDeployment" id="azureDeploymentLabel" data-i18n="azureDeploymentLabel"></label>
+            <input 
+              type="text" 
+              id="azureDeployment" 
+              class="form-control"
+              placeholder="your-deployment-name"
+            >
+          </div>
         </div>
 
         <div class="form-group">
@@ -46,6 +95,15 @@
             <span class="status-indicator"></span>
             <span class="status-text"></span>
           </div>
+        </div>
+
+        <div class="info-box">
+          <h3 id="providerTipsTitle" data-i18n="providerTipsTitle"></h3>
+          <ul>
+            <li id="providerTip1" data-i18n="providerTip1"></li>
+            <li id="providerTip2" data-i18n="providerTip2"></li>
+            <li id="providerTip3" data-i18n="providerTip3"></li>
+          </ul>
         </div>
 
         <div class="button-group">
@@ -94,6 +152,7 @@
   </div>
 
   <script src="localize.js"></script>
+  <script src="ai-providers.js"></script>
   <script src="ai-service.js"></script>
   <script src="settings.js"></script>
 </body>

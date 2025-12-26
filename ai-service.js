@@ -1,9 +1,12 @@
-// AI Service for JSON-LD analysis using OpenAI API
+// AI Service for JSON-LD analysis using multiple AI providers
 class AIService {
   constructor() {
     this.apiKey = null;
-    this.apiEndpoint = 'https://api.openai.com/v1/chat/completions';
+    this.provider = 'openai';
     this.model = 'gpt-4o-mini';
+    this.endpoint = '';
+    this.azureEndpoint = '';
+    this.azureDeployment = '';
   }
 
   isEnglish() {
@@ -11,14 +14,26 @@ class AIService {
     return !String(lang).toLowerCase().startsWith('zh');
   }
 
-  // Initialize and load API key from storage
+  // Initialize and load settings from storage
   async initialize() {
     try {
-      const result = await chrome.storage.sync.get(['openaiApiKey']);
-      this.apiKey = result.openaiApiKey || null;
+      const result = await chrome.storage.sync.get([
+        'ai_provider',
+        'ai_model',
+        'api_key',
+        'api_endpoint',
+        'azure_endpoint',
+        'azure_deployment'
+      ]);
+      this.provider = result.ai_provider || 'openai';
+      this.model = result.ai_model || 'gpt-4o-mini';
+      this.apiKey = result.api_key || null;
+      this.endpoint = result.api_endpoint || '';
+      this.azureEndpoint = result.azure_endpoint || '';
+      this.azureDeployment = result.azure_deployment || '';
       return !!this.apiKey;
     } catch (error) {
-      console.error('Failed to load API key:', error);
+      console.error('Failed to load settings:', error);
       return false;
     }
   }
@@ -28,16 +43,40 @@ class AIService {
     return !!this.apiKey;
   }
 
-  // Set API key
-  async setApiKey(key) {
+  // Set API configuration
+  async setApiConfig(config) {
     try {
-      await chrome.storage.sync.set({ openaiApiKey: key });
-      this.apiKey = key;
+      await chrome.storage.sync.set({
+        ai_provider: config.provider,
+        ai_model: config.model,
+        api_key: config.apiKey,
+        api_endpoint: config.endpoint || '',
+        azure_endpoint: config.azureEndpoint || '',
+        azure_deployment: config.azureDeployment || ''
+      });
+      this.provider = config.provider;
+      this.model = config.model;
+      this.apiKey = config.apiKey;
+      this.endpoint = config.endpoint || '';
+      this.azureEndpoint = config.azureEndpoint || '';
+      this.azureDeployment = config.azureDeployment || '';
       return true;
     } catch (error) {
-      console.error('Failed to save API key:', error);
+      console.error('Failed to save API config:', error);
       return false;
     }
+  }
+
+  // Set API key (backwards compatibility)
+  async setApiKey(key) {
+    return this.setApiConfig({
+      provider: this.provider,
+      model: this.model,
+      apiKey: key,
+      endpoint: this.endpoint,
+      azureEndpoint: this.azureEndpoint,
+      azureDeployment: this.azureDeployment
+    });
   }
 
   // Get API key
@@ -48,56 +87,156 @@ class AIService {
     return this.apiKey;
   }
 
-  // Clear API key
+  // Clear API configuration
   async clearApiKey() {
     try {
-      await chrome.storage.sync.remove(['openaiApiKey']);
+      await chrome.storage.sync.remove([
+        'ai_provider',
+        'ai_model',
+        'api_key',
+        'api_endpoint',
+        'azure_endpoint',
+        'azure_deployment'
+      ]);
+      this.provider = 'openai';
+      this.model = 'gpt-4o-mini';
       this.apiKey = null;
+      this.endpoint = '';
+      this.azureEndpoint = '';
+      this.azureDeployment = '';
       return true;
     } catch (error) {
-      console.error('Failed to clear API key:', error);
+      console.error('Failed to clear API config:', error);
       return false;
     }
   }
 
-  // Make API call to OpenAI
+  // Get API endpoint based on provider
+  getApiEndpoint() {
+    if (this.provider === 'azure') {
+      return `${this.azureEndpoint}/openai/deployments/${this.azureDeployment}/chat/completions?api-version=2024-02-15-preview`;
+    }
+    if (this.endpoint) {
+      return this.endpoint;
+    }
+    const providerConfig = AI_PROVIDERS[this.provider];
+    return providerConfig?.endpoint || 'https://api.openai.com/v1/chat/completions';
+  }
+
+  // Build request headers based on provider
+  buildHeaders() {
+    const headers = {
+      'Content-Type': 'application/json'
+    };
+
+    if (this.provider === 'azure') {
+      headers['api-key'] = this.apiKey;
+    } else if (this.provider === 'anthropic') {
+      headers['x-api-key'] = this.apiKey;
+      headers['anthropic-version'] = '2023-06-01';
+    } else if (this.provider === 'google') {
+      // Google uses API key in URL
+      return headers;
+    } else {
+      headers['Authorization'] = `Bearer ${this.apiKey}`;
+    }
+
+    return headers;
+  }
+
+  // Build request body based on provider
+  buildRequestBody(messages, temperature) {
+    if (this.provider === 'anthropic') {
+      // Convert OpenAI format to Anthropic format
+      const systemMessage = messages.find(m => m.role === 'system');
+      const otherMessages = messages.filter(m => m.role !== 'system');
+      
+      return {
+        model: this.model,
+        messages: otherMessages,
+        system: systemMessage?.content || undefined,
+        temperature: temperature,
+        max_tokens: 2000
+      };
+    } else if (this.provider === 'google') {
+      // Convert to Google Gemini format
+      const contents = messages
+        .filter(m => m.role !== 'system')
+        .map(m => ({
+          role: m.role === 'assistant' ? 'model' : 'user',
+          parts: [{ text: m.content }]
+        }));
+      
+      const systemMessage = messages.find(m => m.role === 'system');
+      
+      return {
+        contents: contents,
+        systemInstruction: systemMessage ? { parts: [{ text: systemMessage.content }] } : undefined,
+        generationConfig: {
+          temperature: temperature,
+          maxOutputTokens: 2000
+        }
+      };
+    } else {
+      // OpenAI, Azure, OpenRouter, Custom format
+      return {
+        model: this.model,
+        messages: messages,
+        temperature: temperature,
+        max_tokens: 2000
+      };
+    }
+  }
+
+  // Parse response based on provider
+  parseResponse(data) {
+    if (this.provider === 'anthropic') {
+      return data.content[0].text;
+    } else if (this.provider === 'google') {
+      return data.candidates[0].content.parts[0].text;
+    } else {
+      return data.choices[0].message.content;
+    }
+  }
+
+  // Make API call to AI provider
   async callOpenAI(messages, temperature = 0.7) {
     if (!this.apiKey) {
       const errorMsg = this.isEnglish()
-        ? 'OpenAI API Key not configured. Please configure it in settings.'
-        : 'OpenAI API Key 未配置，请先在设置中配置';
+        ? 'API Key not configured. Please configure it in settings.'
+        : 'API Key 未配置，请先在设置中配置';
       throw new Error(errorMsg);
     }
 
     try {
-      const response = await fetch(this.apiEndpoint, {
+      let endpoint = this.getApiEndpoint();
+      
+      // For Google, add API key to URL
+      if (this.provider === 'google') {
+        endpoint = `${endpoint}/${this.model}:generateContent?key=${this.apiKey}`;
+      }
+
+      const response = await fetch(endpoint, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${this.apiKey}`
-        },
-        body: JSON.stringify({
-          model: this.model,
-          messages: messages,
-          temperature: temperature,
-          max_tokens: 2000
-        })
+        headers: this.buildHeaders(),
+        body: JSON.stringify(this.buildRequestBody(messages, temperature))
       });
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
         const isEnglish = this.isEnglish();
-        if (response.status === 401) {
+        if (response.status === 401 || response.status === 403) {
           throw new Error(isEnglish ? 'Invalid API Key. Please check your configuration.' : 'API Key 无效，请检查配置');
         } else if (response.status === 429) {
           throw new Error(isEnglish ? 'API rate limit exceeded. Please try again later.' : 'API 调用频率超限，请稍后重试');
         } else {
-          throw new Error(errorData.error?.message || (isEnglish ? `API call failed (${response.status})` : `API 调用失败 (${response.status})`));
+          const errorMsg = errorData.error?.message || errorData.message || (isEnglish ? `API call failed (${response.status})` : `API 调用失败 (${response.status})`);
+          throw new Error(errorMsg);
         }
       }
 
       const data = await response.json();
-      return data.choices[0].message.content;
+      return this.parseResponse(data);
     } catch (error) {
       if (error.message.includes('Failed to fetch')) {
         const isEnglish = this.isEnglish();

@@ -126,6 +126,34 @@ header h1 {
   text-decoration: underline;
 }
 
+.form-control {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 14px;
+  background: white;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.form-control:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.form-control:hover {
+  border-color: #667eea;
+}
+
+select.form-control {
+  cursor: pointer;
+}
+
+input[type="text"].form-control {
+  font-family: 'Courier New', monospace;
+}
+
 .language-select {
   width: 100%;
   padding: 10px 14px;
