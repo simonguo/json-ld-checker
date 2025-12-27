@@ -164,7 +164,30 @@ export default {
   configCleared: '配置已清除',
   clearFailed: '清除失败',
 
+  // Footer
+  contact: '联系我们',
+  reportBug: '报告问题',
+  madeWith: '由',
+  by: '制作',
+  copyright: '版权所有',
+  allRightsReserved: '保留所有权利',
+  documentation: '文档',
+
   // Icon titles
   iconTitleFound: 'JSON-LD Checker - 发现 {count} 个 JSON-LD',
   iconTitleNotFound: 'JSON-LD Checker - 未发现 JSON-LD',
+
+  // Update Notifications
+  updateAvailable: '发现新版本！',
+  updateAvailableDesc: '版本 {version} 已准备好安装。',
+  updateNow: '立即更新',
+  updateLater: '稍后',
+  updateSuccess: '更新成功！',
+  updateSuccessDesc: '已从 v{from} 更新到 v{to}',
+  dismiss: '关闭',
+  currentVersion: '当前版本',
+  checkForUpdates: '检查更新',
+  checking: '检查中...',
+  latestVersion: '您正在使用最新版本！',
+  viewChanges: '查看更新内容',
 };

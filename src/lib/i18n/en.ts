@@ -164,7 +164,30 @@ export default {
   configCleared: 'Configuration cleared',
   clearFailed: 'Clear failed',
 
+  // Footer
+  contact: 'Contact',
+  reportBug: 'Report Bug',
+  madeWith: 'Made with',
+  by: 'by',
+  copyright: 'Copyright',
+  allRightsReserved: 'All rights reserved',
+  documentation: 'Documentation',
+
   // Icon titles
   iconTitleFound: 'JSON-LD Checker - Found {count} JSON-LD',
   iconTitleNotFound: 'JSON-LD Checker - No JSON-LD found',
+
+  // Update Notifications
+  updateAvailable: 'Update Available!',
+  updateAvailableDesc: 'Version {version} is ready to install.',
+  updateNow: 'Update Now',
+  updateLater: 'Later',
+  updateSuccess: 'Successfully Updated!',
+  updateSuccessDesc: 'Updated from v{from} to v{to}',
+  dismiss: 'Dismiss',
+  currentVersion: 'Current Version',
+  checkForUpdates: 'Check for Updates',
+  checking: 'Checking...',
+  latestVersion: 'You are using the latest version!',
+  viewChanges: 'View Changes',
 };
