@@ -44,6 +44,9 @@ export default {
   suggestion: '建议',
   info: '信息',
   description: '描述',
+  googleTest: 'Google 测试',
+  googleTestTitle: '使用 Google 富媒体结果测试',
+  suggestionLabel: '建议',
 
   // No JSON-LD
   noJsonLdFound: '未发现 JSON-LD',

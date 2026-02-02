@@ -10,7 +10,7 @@ interface HeaderProps {
 
 export default function Header({ title, subtitle, onRefresh, onSettings, refreshing }: HeaderProps) {
   return (
-    <header className="bg-gradient-to-r from-primary-500 to-purple-600 text-white px-4 py-3 shadow-md">
+    <header className="bg-primary-500 text-white px-4 py-3 shadow-md">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-lg font-semibold">{title}</h1>

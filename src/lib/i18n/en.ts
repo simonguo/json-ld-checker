@@ -44,6 +44,9 @@ export default {
   suggestion: 'Suggestion',
   info: 'Info',
   description: 'Description',
+  googleTest: 'Google Test',
+  googleTestTitle: 'Test with Google Rich Results',
+  suggestionLabel: 'Suggestion',
 
   // No JSON-LD
   noJsonLdFound: 'No JSON-LD Found',

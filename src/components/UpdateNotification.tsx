@@ -67,30 +67,30 @@ export const UpdateNotification: React.FC<UpdateNotificationProps> = ({ language
     <div className="space-y-3">
       {/* Update Available Banner */}
       {updateStatus.updateAvailable && (
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+        <div className="bg-primary-50 border border-primary-100 rounded-lg p-4">
           <div className="flex items-start gap-3">
             <div className="flex-shrink-0">
-              <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-6 h-6 text-primary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
             </div>
             <div className="flex-1">
-              <h4 className="text-sm font-semibold text-blue-900 mb-1">
+              <h4 className="text-sm font-semibold text-primary-700 mb-1">
                 🎉 {t('updateAvailable')}
               </h4>
-              <p className="text-sm text-blue-700 mb-3">
+              <p className="text-sm text-primary-600 mb-3">
                 {t('updateAvailableDesc', { version: updateStatus.availableVersion })}
               </p>
               <div className="flex gap-2">
                 <button
                   onClick={handleApplyUpdate}
-                  className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors"
+                  className="px-4 py-2 bg-primary-500 text-white text-sm font-medium rounded-lg hover:bg-primary-600 transition-colors"
                 >
                   {t('updateNow')}
                 </button>
                 <button
                   onClick={() => setUpdateStatus({ ...updateStatus, updateAvailable: false })}
-                  className="px-4 py-2 bg-white text-blue-600 text-sm font-medium rounded-lg border border-blue-600 hover:bg-blue-50 transition-colors"
+                  className="px-4 py-2 bg-white text-primary-500 text-sm font-medium rounded-lg border border-primary-500 hover:bg-primary-50 transition-colors"
                 >
                   {t('updateLater')}
                 </button>
@@ -136,7 +136,7 @@ export const UpdateNotification: React.FC<UpdateNotificationProps> = ({ language
         <button
           onClick={handleCheckForUpdates}
           disabled={checking}
-          className="px-4 py-2 bg-purple-600 text-white text-sm font-medium rounded-lg hover:bg-purple-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
+          className="px-4 py-2 bg-primary-500 text-white text-sm font-medium rounded-lg hover:bg-primary-600 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
         >
           {checking ? (
             <>

@@ -203,7 +203,7 @@ export default function OptionsPage() {
         {/* Page Header */}
         <div className="bg-white rounded-lg shadow-sm p-6">
           <div className="flex items-center gap-3 mb-2">
-            <Globe className="text-blue-600" size={24} />
+            <Globe className="text-primary-500" size={24} />
             <div>
               <h2 className="text-lg font-semibold text-gray-900">{t('settingsTitle')}</h2>
             </div>
@@ -219,7 +219,7 @@ export default function OptionsPage() {
         {/* AI Provider */}
         <div className="bg-white rounded-lg shadow-sm p-6">
           <div className="flex items-center gap-3 mb-6">
-            <Key className="text-blue-600" size={24} />
+            <Key className="text-primary-500" size={24} />
             <div>
               <h2 className="text-lg font-semibold text-gray-900">{t('aiConfiguration')}</h2>
               <p className="text-sm text-gray-600">{t('aiConfigDescription')}</p>
@@ -233,7 +233,7 @@ export default function OptionsPage() {
                 <select
                   value={settings.provider}
                   onChange={(e) => handleProviderChange(e.target.value as ProviderKey)}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent text-gray-900"
                 >
                   {Object.entries(AI_PROVIDERS).map(([key, provider]) => (
                     <option key={key} value={key}>
@@ -249,7 +249,7 @@ export default function OptionsPage() {
                 <select
                   value={settings.model}
                   onChange={(e) => setSettings({ ...settings, model: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent text-gray-900"
                 >
                   {models.map((model) => (
                     <option key={model.id} value={model.id}>
@@ -270,7 +270,7 @@ export default function OptionsPage() {
                     value={settings.apiKey}
                     onChange={(e) => setSettings({ ...settings, apiKey: e.target.value })}
                     placeholder={AI_PROVIDERS[settings.provider].apiKeyPrefix || t('apiKeyPlaceholder')}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent text-gray-900"
                   />
                   <button
                     type="button"
@@ -303,7 +303,7 @@ export default function OptionsPage() {
                     value={settings.endpoint}
                     onChange={(e) => setSettings({ ...settings, endpoint: e.target.value })}
                     placeholder={AI_PROVIDERS[settings.provider].endpoint || t('endpointPlaceholder')}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent text-gray-900"
                   />
                   <p className="mt-2 text-sm text-gray-500">
                     {t('endpointHelp')}
@@ -321,7 +321,7 @@ export default function OptionsPage() {
                     value={settings.azureEndpoint}
                     onChange={(e) => setSettings({ ...settings, azureEndpoint: e.target.value })}
                     placeholder="https://your-resource.openai.azure.com"
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent text-gray-900"
                   />
                 </div>
                 <div>
@@ -331,7 +331,7 @@ export default function OptionsPage() {
                     value={settings.azureDeployment}
                     onChange={(e) => setSettings({ ...settings, azureDeployment: e.target.value })}
                     placeholder="your-deployment-name"
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent text-gray-900"
                   />
                 </div>
               </div>
@@ -361,7 +361,7 @@ export default function OptionsPage() {
               <button
                 onClick={handleSave}
                 disabled={saving}
-                className="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors font-medium"
+                className="flex items-center gap-2 px-6 py-3 bg-primary-500 text-white rounded-lg hover:bg-primary-600 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors font-medium"
               >
                 {saving ? (
                   <>
@@ -412,7 +412,7 @@ export default function OptionsPage() {
         {/* Preferences - moved below AI settings */}
         <div className="bg-white rounded-lg shadow-sm p-6">
           <div className="flex items-center gap-3 mb-6">
-            <Globe className="text-blue-600" size={24} />
+            <Globe className="text-primary-500" size={24} />
             <div>
               <h2 className="text-lg font-semibold text-gray-900">{t('languageSettings')}</h2>
               <p className="text-sm text-gray-600">{t('languageSettingsDescription')}</p>
@@ -427,7 +427,7 @@ export default function OptionsPage() {
               <select
                 value={settings.language}
                 onChange={(e) => handleLanguageChange(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent text-gray-900"
               >
                 <option value="auto">{t('autoDetect')}</option>
                 <option value="en">{t('english')}</option>
@@ -441,11 +441,11 @@ export default function OptionsPage() {
         </div>
 
         {/* Footer */}
-        <div className="bg-white rounded-lg shadow-sm p-6 border-t-4 border-blue-500">
+        <div className="bg-white rounded-lg shadow-sm p-6 border-t-4 border-primary-500">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
             {/* Left side - Project info */}
             <div className="flex items-center gap-3">
-              <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center">
+              <div className="w-12 h-12 bg-primary-500 rounded-lg flex items-center justify-center">
                 <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
                 </svg>
