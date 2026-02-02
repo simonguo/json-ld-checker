@@ -90,25 +90,67 @@ export class JsonLdValidator {
     }
 
     this.validateContext(jsonLdData, results, userLanguage);
-    this.validateType(jsonLdData, results, userLanguage);
 
-    if (jsonLdData['@type']) {
-      this.validateRequiredProperties(jsonLdData, results, userLanguage);
-      this.checkRecommendedProperties(jsonLdData, results, userLanguage);
+    // Handle @graph structure
+    if (jsonLdData['@graph'] && Array.isArray(jsonLdData['@graph'])) {
+      results.info.push({
+        type: 'info',
+        title: eng ? 'Detected @graph structure' : '检测到 @graph 结构',
+        message: eng 
+          ? `Validating ${jsonLdData['@graph'].length} item(s) in @graph`
+          : `正在验证 @graph 中的 ${jsonLdData['@graph'].length} 个项目`,
+      });
+
+      // Validate each item in @graph
+      jsonLdData['@graph'].forEach((item: any, index: number) => {
+        if (typeof item === 'object' && item !== null) {
+          this.validateGraphItem(item, results, userLanguage, index);
+        }
+      });
+    } else {
+      // Regular JSON-LD structure
+      this.validateType(jsonLdData, results, userLanguage);
+
+      if (jsonLdData['@type']) {
+        this.validateRequiredProperties(jsonLdData, results, userLanguage);
+        this.checkRecommendedProperties(jsonLdData, results, userLanguage);
+      }
+
+      this.checkCommonIssues(jsonLdData, results, userLanguage);
+      this.validateImageRequirements(jsonLdData, results, userLanguage);
+      this.validateTextLengths(jsonLdData, results, userLanguage);
+      this.validateRatings(jsonLdData, results, userLanguage);
+      this.validatePriceAndOffers(jsonLdData, results, userLanguage);
+      this.validateDateLogic(jsonLdData, results, userLanguage);
+      this.validateEnumValues(jsonLdData, results, userLanguage);
+      this.validateTypeSpecificRules(jsonLdData, results, userLanguage);
+      this.validateNestedObjects(jsonLdData, results, userLanguage);
+      this.checkBestPractices(jsonLdData, results, userLanguage);
     }
 
-    this.checkCommonIssues(jsonLdData, results, userLanguage);
-    this.validateImageRequirements(jsonLdData, results, userLanguage);
-    this.validateTextLengths(jsonLdData, results, userLanguage);
-    this.validateRatings(jsonLdData, results, userLanguage);
-    this.validatePriceAndOffers(jsonLdData, results, userLanguage);
-    this.validateDateLogic(jsonLdData, results, userLanguage);
-    this.validateEnumValues(jsonLdData, results, userLanguage);
-    this.validateTypeSpecificRules(jsonLdData, results, userLanguage);
-    this.validateNestedObjects(jsonLdData, results, userLanguage);
-    this.checkBestPractices(jsonLdData, results, userLanguage);
-
     return results;
+  }
+
+  private validateGraphItem(item: any, results: ValidationResults, userLanguage?: string, index?: number): void {
+    const prefix = index !== undefined ? `@graph[${index}]` : '@graph item';
+    
+    this.validateType(item, results, userLanguage);
+
+    if (item['@type']) {
+      this.validateRequiredProperties(item, results, userLanguage);
+      this.checkRecommendedProperties(item, results, userLanguage);
+    }
+
+    this.checkCommonIssues(item, results, userLanguage);
+    this.validateImageRequirements(item, results, userLanguage);
+    this.validateTextLengths(item, results, userLanguage);
+    this.validateRatings(item, results, userLanguage);
+    this.validatePriceAndOffers(item, results, userLanguage);
+    this.validateDateLogic(item, results, userLanguage);
+    this.validateEnumValues(item, results, userLanguage);
+    this.validateTypeSpecificRules(item, results, userLanguage);
+    this.validateNestedObjects(item, results, userLanguage);
+    this.checkBestPractices(item, results, userLanguage);
   }
 
   private validateContext(data: any, results: ValidationResults, userLanguage?: string): void {

@@ -3,1124 +3,435 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>JSON-LD Checker - Promo Image Generator</title>
+    <title>JSON-LD Checker - Promo Generator</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f7f9fc;
             min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
+            padding: 32px;
         }
 
         .container {
-            background: white;
-            border-radius: 16px;
-            padding: 30px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
             max-width: 1500px;
+            margin: 0 auto;
         }
 
         h1 {
-            color: #333;
-            margin-bottom: 20px;
+            font-size: 24px;
+            color: #1e293b;
+            margin-bottom: 24px;
             text-align: center;
+        }
+
+        .options {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 24px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .options label {
+            font-weight: 600;
+            color: #475569;
+            font-size: 14px;
+        }
+
+        select {
+            padding: 8px 16px;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            font-size: 14px;
+            background: white;
+        }
+
+        .canvas-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 24px;
+        }
+
+        @media (min-width: 1200px) {
+            .canvas-grid { grid-template-columns: 1fr 1fr; }
+        }
+
+        .canvas-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+        }
+
+        .canvas-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .canvas-title {
+            font-weight: 600;
+            color: #1e293b;
+        }
+
+        .canvas-size {
+            font-size: 12px;
+            color: #28a745;
+            background: rgba(40,167,69,0.1);
+            padding: 4px 10px;
+            border-radius: 4px;
         }
 
         .canvas-wrapper {
-            margin: 20px 0;
-            border: 2px solid #e0e0e0;
             border-radius: 8px;
             overflow: hidden;
-            display: inline-block;
-        }
-
-        .canvas-container {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 30px;
-            margin: 20px 0;
-        }
-
-        @media (min-width: 1400px) {
-            .canvas-container {
-                grid-template-columns: 1fr 1fr;
-            }
-        }
-
-        .canvas-item {
-            text-align: center;
-        }
-
-        .canvas-item h3 {
-            margin-bottom: 10px;
-            color: #555;
-            font-size: 18px;
-        }
-
-        .size-label {
-            display: inline-block;
-            background: #e3f2fd;
-            color: #1976d2;
-            padding: 4px 12px;
-            border-radius: 4px;
-            font-size: 14px;
-            margin-left: 10px;
+            border: 1px solid #e2e8f0;
+            margin-bottom: 16px;
         }
 
         canvas {
             display: block;
-            margin: 0 auto;
-            background: #f0f0f0;
+            width: 100%;
+            height: auto;
         }
 
-        .controls {
+        .btn-row {
             display: flex;
-            gap: 15px;
-            justify-content: center;
-            flex-wrap: wrap;
-            margin-top: 20px;
-        }
-
-        button {
-            padding: 12px 24px;
-            font-size: 16px;
-            font-weight: 600;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-
-        button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
-        }
-
-        .btn-primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-        }
-
-        .btn-secondary {
-            background: #3b82f6;
-            color: white;
-        }
-
-        .btn-success {
-            background: #10b981;
-            color: white;
-        }
-
-        .options {
-            margin: 20px 0;
-            padding: 20px;
-            background: #f8f9fa;
-            border-radius: 8px;
-        }
-
-        .option-group {
-            margin: 10px 0;
-        }
-
-        label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: 600;
-            color: #555;
-        }
-
-        select, input[type="color"] {
-            padding: 8px 12px;
-            border: 2px solid #e0e0e0;
-            border-radius: 6px;
-            font-size: 14px;
-            margin-right: 10px;
-        }
-
-        .color-input {
-            display: inline-flex;
-            align-items: center;
             gap: 10px;
         }
 
-        input[type="color"] {
-            width: 50px;
-            height: 40px;
+        .btn {
+            flex: 1;
+            padding: 10px 16px;
+            border: none;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 600;
             cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            box-shadow: 0 4px 12px rgba(40,167,69,0.35);
+        }
+
+        .btn-secondary {
+            background: #f1f5f9;
+            color: #475569;
+        }
+
+        .btn-secondary:hover {
+            background: #e2e8f0;
         }
 
         .info {
-            background: #e3f2fd;
-            padding: 15px;
+            margin-top: 24px;
+            padding: 16px;
+            background: rgba(40,167,69,0.05);
+            border: 1px solid rgba(40,167,69,0.15);
             border-radius: 8px;
-            margin-top: 20px;
-            color: #1976d2;
+            font-size: 13px;
+            color: #64748b;
+            line-height: 1.8;
         }
 
-        .template-selector {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
-            margin: 20px 0;
-        }
-
-        .template-card {
-            padding: 15px;
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            text-align: center;
-        }
-
-        .template-card:hover {
-            border-color: #667eea;
-            background: #f8f9fa;
-        }
-
-        .template-card.active {
-            border-color: #667eea;
-            background: #e3f2fd;
-        }
+        .info strong { color: #28a745; }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>🎨 JSON-LD Checker - Promo Image Generator</h1>
-        
-        <div class="options">
-            <h3 style="margin-bottom: 15px;">Select Template</h3>
-            <div class="template-selector">
-                <div class="template-card active" data-template="modern">
-                    <h4>Modern Gradient</h4>
-                    <p style="font-size: 12px; color: #666;">Clean & Professional</p>
-                </div>
-                <div class="template-card" data-template="tech">
-                    <h4>Tech Grid</h4>
-                    <p style="font-size: 12px; color: #666;">Futuristic Style</p>
-                </div>
-                <div class="template-card" data-template="minimal">
-                    <h4>Minimal</h4>
-                    <p style="font-size: 12px; color: #666;">Simple & Clean</p>
-                </div>
-                <div class="template-card" data-template="vibrant">
-                    <h4>Vibrant</h4>
-                    <p style="font-size: 12px; color: #666;">Bold & Colorful</p>
-                </div>
-            </div>
+        <h1>Promo Image Generator</h1>
 
-            <div class="option-group">
-                <label>Language:</label>
-                <select id="language">
-                    <option value="en">English</option>
-                    <option value="zh">中文</option>
-                </select>
-            </div>
+        <div class="options">
+            <label>Language:</label>
+            <select id="language">
+                <option value="en">English</option>
+                <option value="zh">中文</option>
+            </select>
+            <button class="btn btn-primary" onclick="render()" style="margin-left: auto;">Regenerate</button>
         </div>
 
-        <div class="canvas-container">
-            <div class="canvas-item">
-                <h3>Large Promo <span class="size-label">1400 x 560</span></h3>
-                <div class="canvas-wrapper">
-                    <canvas id="promoCanvas" width="1400" height="560"></canvas>
+        <div class="canvas-grid">
+            <div class="canvas-card">
+                <div class="canvas-header">
+                    <span class="canvas-title">Large Promo Tile</span>
+                    <span class="canvas-size">1400 × 560</span>
                 </div>
-                <div class="controls" style="margin-top: 15px;">
-                    <button class="btn-secondary" onclick="downloadPNG('large')">📥 Download PNG</button>
-                    <button class="btn-success" onclick="downloadJPEG('large')">📥 Download JPEG</button>
+                <div class="canvas-wrapper">
+                    <canvas id="largeCanvas" width="1400" height="560"></canvas>
+                </div>
+                <div class="btn-row">
+                    <button class="btn btn-primary" onclick="download('large','png')">Download PNG</button>
+                    <button class="btn btn-secondary" onclick="download('large','jpeg')">Download JPEG</button>
                 </div>
             </div>
 
-            <div class="canvas-item">
-                <h3>Small Tile <span class="size-label">440 x 280</span></h3>
+            <div class="canvas-card">
+                <div class="canvas-header">
+                    <span class="canvas-title">Small Promo Tile</span>
+                    <span class="canvas-size">440 × 280</span>
+                </div>
                 <div class="canvas-wrapper">
                     <canvas id="smallCanvas" width="440" height="280"></canvas>
                 </div>
-                <div class="controls" style="margin-top: 15px;">
-                    <button class="btn-secondary" onclick="downloadPNG('small')">📥 Download PNG</button>
-                    <button class="btn-success" onclick="downloadJPEG('small')">📥 Download JPEG</button>
+                <div class="btn-row">
+                    <button class="btn btn-primary" onclick="download('small','png')">Download PNG</button>
+                    <button class="btn btn-secondary" onclick="download('small','jpeg')">Download JPEG</button>
                 </div>
             </div>
         </div>
 
-        <div class="controls">
-            <button class="btn-primary" onclick="regenerate()">🎨 Regenerate All</button>
-        </div>
-
         <div class="info">
-            <strong>📌 Info:</strong> 
-            <br>• Large: 1400 x 560 pixels (Chrome Web Store large promo tile)
-            <br>• Small: 440 x 280 pixels (Chrome Web Store small promo tile)
-            <br>Format: JPEG or 24-bit PNG without alpha transparency
+            <strong>Chrome Web Store Requirements:</strong><br>
+            • Large: 1400 × 560 px &nbsp;|&nbsp; Small: 440 × 280 px<br>
+            • Format: JPEG or 24-bit PNG (no alpha)
         </div>
     </div>
 
     <script>
-        let currentTemplate = 'modern';
-        let currentLanguage = 'en';
-
         const content = {
             en: {
                 title: 'JSON-LD Checker',
-                subtitle: 'Validate & Optimize Your Structured Data',
+                subtitle: 'Extract • Validate • Visualize Structured Data',
                 features: [
-                    '✓ Real-time Validation',
-                    '✓ AI-Powered Analysis',
-                    '✓ Schema.org Compliant',
-                    '✓ SEO Optimization'
+                    'Auto Detection',
+                    'Tree View & Raw JSON',
+                    'Built-in Validator',
+                    'AI-Powered Analysis'
                 ],
-                cta: 'Boost Your SEO Today!'
+                cta: 'Boost Your SEO',
+                tagline: 'Chrome Extension for SEO & Structured Data'
             },
             zh: {
                 title: 'JSON-LD Checker',
-                subtitle: '验证和优化您的结构化数据',
+                subtitle: '抓取 • 校验 • 可视化结构化数据',
                 features: [
-                    '✓ 实时验证',
-                    '✓ AI 智能分析',
-                    '✓ Schema.org 规范',
-                    '✓ SEO 优化'
+                    '自动检测',
+                    '树形视图 & 原始 JSON',
+                    '内置校验器',
+                    'AI 智能分析'
                 ],
-                cta: '立即提升您的 SEO！'
+                cta: '提升您的 SEO',
+                tagline: 'SEO 与结构化数据浏览器插件'
             }
         };
 
-        function drawModernTemplate(ctx, data) {
-            const gradient = ctx.createLinearGradient(0, 0, 1400, 560);
-            gradient.addColorStop(0, '#667eea');
-            gradient.addColorStop(1, '#764ba2');
-            ctx.fillStyle = gradient;
-            ctx.fillRect(0, 0, 1400, 560);
+        function roundRect(ctx, x, y, w, h, r) {
+            ctx.beginPath();
+            ctx.moveTo(x + r, y);
+            ctx.lineTo(x + w - r, y);
+            ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+            ctx.lineTo(x + w, y + h - r);
+            ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+            ctx.lineTo(x + r, y + h);
+            ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+            ctx.lineTo(x, y + r);
+            ctx.quadraticCurveTo(x, y, x + r, y);
+            ctx.closePath();
+        }
 
-            // Add subtle pattern
-            ctx.globalAlpha = 0.1;
-            for (let i = 0; i < 20; i++) {
-                ctx.fillStyle = 'white';
-                ctx.beginPath();
-                ctx.arc(Math.random() * 1400, Math.random() * 560, Math.random() * 100, 0, Math.PI * 2);
-                ctx.fill();
-            }
+        function drawLogo(ctx, x, y, size) {
+            const r = size * 0.16;
+            ctx.fillStyle = 'rgba(255,255,255,0.18)';
+            roundRect(ctx, x, y, size, size, r);
+            ctx.fill();
+            ctx.strokeStyle = 'rgba(255,255,255,0.35)';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+
+            ctx.fillStyle = 'white';
+            ctx.font = `bold ${size * 0.5}px Arial`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('{}', x + size / 2, y + size / 2);
+        }
+
+        function drawLarge(ctx, data) {
+            const w = 1400, h = 560;
+
+            // Solid background (matches Logo #28a745)
+            ctx.fillStyle = '#28a745';
+            ctx.fillRect(0, 0, w, h);
+
+            // Decorative circles
+            ctx.globalAlpha = 0.08;
+            ctx.fillStyle = 'white';
+            ctx.beginPath(); ctx.arc(1200, 120, 180, 0, Math.PI * 2); ctx.fill();
+            ctx.beginPath(); ctx.arc(150, 480, 120, 0, Math.PI * 2); ctx.fill();
+            ctx.beginPath(); ctx.arc(1350, 500, 100, 0, Math.PI * 2); ctx.fill();
             ctx.globalAlpha = 1;
 
-            // Icon circle
-            ctx.fillStyle = 'rgba(255, 255, 255, 0.2)';
-            ctx.beginPath();
-            ctx.arc(250, 200, 100, 0, Math.PI * 2);
-            ctx.fill();
-
-            // Icon - Code brackets
-            ctx.strokeStyle = 'white';
-            ctx.lineWidth = 8;
-            ctx.beginPath();
-            ctx.moveTo(190, 150);
-            ctx.lineTo(160, 200);
-            ctx.lineTo(190, 250);
-            ctx.stroke();
-            ctx.beginPath();
-            ctx.moveTo(310, 150);
-            ctx.lineTo(340, 200);
-            ctx.lineTo(310, 250);
-            ctx.stroke();
-            
-            // Center line
-            ctx.lineWidth = 6;
-            ctx.beginPath();
-            ctx.moveTo(260, 165);
-            ctx.lineTo(240, 235);
-            ctx.stroke();
+            // Logo
+            drawLogo(ctx, 80, 80, 100);
 
             // Title
             ctx.fillStyle = 'white';
             ctx.font = 'bold 72px Arial';
-            ctx.fillText(data.title, 80, 380);
+            ctx.textAlign = 'left';
+            ctx.textBaseline = 'alphabetic';
+            ctx.fillText(data.title, 210, 145);
+
+            // Tagline
+            ctx.fillStyle = 'rgba(255,255,255,0.75)';
+            ctx.font = '22px Arial';
+            ctx.fillText(data.tagline, 210, 180);
 
             // Subtitle
+            ctx.fillStyle = 'white';
             ctx.font = '32px Arial';
-            ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
-            ctx.fillText(data.subtitle, 80, 430);
+            ctx.fillText(data.subtitle, 80, 280);
 
             // Features
-            ctx.font = '24px Arial';
-            ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
-            data.features.forEach((feature, index) => {
-                ctx.fillText(feature, 900, 180 + index * 45);
+            const featureColors = ['#fff', '#d4edda', '#c3e6cb', '#b1dfbb'];
+            ctx.font = 'bold 24px Arial';
+            data.features.forEach((f, i) => {
+                const fx = 80 + (i % 2) * 400;
+                const fy = 340 + Math.floor(i / 2) * 60;
+                
+                // Dot
+                ctx.fillStyle = featureColors[i];
+                ctx.beginPath();
+                ctx.arc(fx + 10, fy - 8, 6, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Text
+                ctx.fillStyle = 'rgba(255,255,255,0.95)';
+                ctx.fillText(f, fx + 30, fy);
+            });
+
+            // CTA Button
+            const btnX = 950, btnY = 320, btnW = 360, btnH = 70;
+            ctx.fillStyle = 'rgba(255,255,255,0.2)';
+            roundRect(ctx, btnX, btnY, btnW, btnH, 12);
+            ctx.fill();
+            ctx.strokeStyle = 'rgba(255,255,255,0.5)';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+
+            ctx.fillStyle = 'white';
+            ctx.font = 'bold 28px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText(data.cta, btnX + btnW / 2, btnY + 45);
+
+            // Arrow
+            ctx.strokeStyle = 'white';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.moveTo(btnX + btnW - 50, btnY + 30);
+            ctx.lineTo(btnX + btnW - 35, btnY + 35);
+            ctx.lineTo(btnX + btnW - 50, btnY + 40);
+            ctx.stroke();
+
+            // Bottom accent
+            ctx.fillStyle = 'rgba(255,255,255,0.15)';
+            ctx.fillRect(0, h - 6, w, 6);
+        }
+
+        function drawSmall(ctx, data) {
+            const w = 440, h = 280;
+
+            // Solid background (matches Logo #28a745)
+            ctx.fillStyle = '#28a745';
+            ctx.fillRect(0, 0, w, h);
+
+            // Decorative circles
+            ctx.globalAlpha = 0.08;
+            ctx.fillStyle = 'white';
+            ctx.beginPath(); ctx.arc(380, 50, 70, 0, Math.PI * 2); ctx.fill();
+            ctx.beginPath(); ctx.arc(50, 250, 50, 0, Math.PI * 2); ctx.fill();
+            ctx.globalAlpha = 1;
+
+            // Logo
+            drawLogo(ctx, 30, 30, 50);
+
+            // Title
+            ctx.fillStyle = 'white';
+            ctx.font = 'bold 32px Arial';
+            ctx.textAlign = 'left';
+            ctx.textBaseline = 'alphabetic';
+            ctx.fillText(data.title, 95, 62);
+
+            // Tagline
+            ctx.fillStyle = 'rgba(255,255,255,0.7)';
+            ctx.font = '12px Arial';
+            ctx.fillText(data.tagline, 95, 80);
+
+            // Subtitle
+            ctx.fillStyle = 'white';
+            ctx.font = '15px Arial';
+            ctx.fillText(data.subtitle, 30, 120);
+
+            // Features (2 columns)
+            ctx.font = 'bold 12px Arial';
+            data.features.forEach((f, i) => {
+                const fx = 30 + (i % 2) * 200;
+                const fy = 155 + Math.floor(i / 2) * 35;
+
+                ctx.fillStyle = 'rgba(255,255,255,0.9)';
+                ctx.beginPath();
+                ctx.arc(fx + 5, fy - 4, 3, 0, Math.PI * 2);
+                ctx.fill();
+
+                ctx.fillStyle = 'rgba(255,255,255,0.9)';
+                ctx.fillText(f, fx + 15, fy);
             });
 
             // CTA
-            ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
-            ctx.fillRect(80, 470, 400, 60);
-            ctx.fillStyle = 'white';
-            ctx.font = 'bold 28px Arial';
-            ctx.fillText(data.cta, 100, 510);
-        }
+            const btnX = 30, btnY = 230, btnW = 150, btnH = 36;
+            ctx.fillStyle = 'rgba(255,255,255,0.2)';
+            roundRect(ctx, btnX, btnY, btnW, btnH, 8);
+            ctx.fill();
 
-        function drawTechTemplate(ctx, data) {
-            // Dark background with subtle gradient
-            const bgGradient = ctx.createLinearGradient(0, 0, 1400, 560);
-            bgGradient.addColorStop(0, '#0a0e27');
-            bgGradient.addColorStop(1, '#1a1f3a');
-            ctx.fillStyle = bgGradient;
-            ctx.fillRect(0, 0, 1400, 560);
-
-            // Enhanced grid pattern
-            ctx.strokeStyle = 'rgba(100, 116, 255, 0.15)';
-            ctx.lineWidth = 1;
-            for (let i = 0; i < 1400; i += 40) {
-                ctx.beginPath();
-                ctx.moveTo(i, 0);
-                ctx.lineTo(i, 560);
-                ctx.stroke();
-            }
-            for (let i = 0; i < 560; i += 40) {
-                ctx.beginPath();
-                ctx.moveTo(0, i);
-                ctx.lineTo(1400, i);
-                ctx.stroke();
-            }
-
-            // Animated glowing circles (larger and more vibrant)
-            const circles = [
-                {x: 180, y: 120, r: 100, color: 'rgba(102, 126, 234, 0.4)'},
-                {x: 1250, y: 420, r: 140, color: 'rgba(118, 75, 162, 0.35)'},
-                {x: 750, y: 280, r: 80, color: 'rgba(59, 130, 246, 0.3)'},
-                {x: 450, y: 450, r: 60, color: 'rgba(16, 185, 129, 0.25)'}
-            ];
-
-            circles.forEach(circle => {
-                const gradient = ctx.createRadialGradient(circle.x, circle.y, 0, circle.x, circle.y, circle.r);
-                gradient.addColorStop(0, circle.color);
-                gradient.addColorStop(1, 'transparent');
-                ctx.fillStyle = gradient;
-                ctx.beginPath();
-                ctx.arc(circle.x, circle.y, circle.r, 0, Math.PI * 2);
-                ctx.fill();
-            });
-
-            // Decorative hexagons
-            function drawHexagon(x, y, size, fillColor) {
-                ctx.beginPath();
-                for (let i = 0; i < 6; i++) {
-                    const angle = (Math.PI / 3) * i;
-                    const hx = x + size * Math.cos(angle);
-                    const hy = y + size * Math.sin(angle);
-                    if (i === 0) ctx.moveTo(hx, hy);
-                    else ctx.lineTo(hx, hy);
-                }
-                ctx.closePath();
-                ctx.fillStyle = fillColor;
-                ctx.fill();
-                ctx.strokeStyle = 'rgba(102, 126, 234, 0.3)';
-                ctx.lineWidth = 2;
-                ctx.stroke();
-            }
-
-            drawHexagon(1100, 150, 30, 'rgba(102, 126, 234, 0.1)');
-            drawHexagon(1200, 250, 25, 'rgba(118, 75, 162, 0.1)');
-            drawHexagon(950, 100, 20, 'rgba(59, 130, 246, 0.1)');
-
-            // Badge - "FREE" or version
-            ctx.fillStyle = 'rgba(16, 185, 129, 0.2)';
-            ctx.fillRect(1180, 30, 180, 50);
-            ctx.strokeStyle = '#10b981';
-            ctx.lineWidth = 2;
-            ctx.strokeRect(1180, 30, 180, 50);
-            ctx.fillStyle = '#10b981';
-            ctx.font = 'bold 24px Arial';
-            ctx.fillText('FREE', 1220, 62);
-
-            // Logo/Icon area with modern design
-            const iconX = 80;
-            const iconY = 80;
-            
-            // Icon background
-            ctx.fillStyle = 'rgba(102, 126, 234, 0.15)';
-            ctx.fillRect(iconX, iconY, 100, 100);
-            
-            // Icon border with gradient
-            const iconBorderGradient = ctx.createLinearGradient(iconX, iconY, iconX + 100, iconY + 100);
-            iconBorderGradient.addColorStop(0, '#667eea');
-            iconBorderGradient.addColorStop(1, '#764ba2');
-            ctx.strokeStyle = iconBorderGradient;
-            ctx.lineWidth = 3;
-            ctx.strokeRect(iconX, iconY, 100, 100);
-
-            // Code brackets icon
-            ctx.strokeStyle = '#667eea';
-            ctx.lineWidth = 5;
-            ctx.beginPath();
-            ctx.moveTo(iconX + 25, iconY + 30);
-            ctx.lineTo(iconX + 15, iconY + 50);
-            ctx.lineTo(iconX + 25, iconY + 70);
-            ctx.stroke();
-            
-            ctx.beginPath();
-            ctx.moveTo(iconX + 75, iconY + 30);
-            ctx.lineTo(iconX + 85, iconY + 50);
-            ctx.lineTo(iconX + 75, iconY + 70);
-            ctx.stroke();
-            
-            ctx.strokeStyle = '#764ba2';
-            ctx.lineWidth = 4;
-            ctx.beginPath();
-            ctx.moveTo(iconX + 55, iconY + 35);
-            ctx.lineTo(iconX + 45, iconY + 65);
-            ctx.stroke();
-
-            // Title with enhanced glow
-            ctx.shadowColor = '#667eea';
-            ctx.shadowBlur = 30;
-            ctx.fillStyle = '#ffffff';
-            ctx.font = 'bold 82px Arial';
-            ctx.fillText(data.title, 210, 130);
-            
-            // Additional subtle shadow
-            ctx.shadowColor = '#764ba2';
-            ctx.shadowBlur = 20;
-            ctx.fillText(data.title, 210, 130);
-            ctx.shadowBlur = 0;
-
-            // Accent line with glow
-            const lineGradient = ctx.createLinearGradient(210, 0, 750, 0);
-            lineGradient.addColorStop(0, '#667eea');
-            lineGradient.addColorStop(0.5, '#764ba2');
-            lineGradient.addColorStop(1, 'rgba(118, 75, 162, 0)');
-            ctx.shadowColor = '#667eea';
-            ctx.shadowBlur = 10;
-            ctx.fillStyle = lineGradient;
-            ctx.fillRect(210, 150, 540, 5);
-            ctx.shadowBlur = 0;
-
-            // Subtitle with better spacing
-            ctx.fillStyle = '#cbd5e1';
-            ctx.font = '36px Arial';
-            ctx.fillText(data.subtitle, 210, 210);
-
-            // Features section with enhanced design
-            ctx.font = 'bold 28px Arial';
-            const featureStartY = 280;
-            
-            data.features.forEach((feature, index) => {
-                const y = featureStartY + index * 58;
-                
-                // Feature card with border
-                const cardGradient = ctx.createLinearGradient(80, y - 35, 80, y + 10);
-                cardGradient.addColorStop(0, 'rgba(102, 126, 234, 0.15)');
-                cardGradient.addColorStop(1, 'rgba(102, 126, 234, 0.05)');
-                ctx.fillStyle = cardGradient;
-                ctx.fillRect(80, y - 35, 450, 45);
-                
-                // Left border accent
-                const accentColors = ['#667eea', '#764ba2', '#3b82f6', '#10b981'];
-                ctx.fillStyle = accentColors[index];
-                ctx.fillRect(80, y - 35, 5, 45);
-                
-                // Border
-                ctx.strokeStyle = 'rgba(102, 126, 234, 0.3)';
-                ctx.lineWidth = 1;
-                ctx.strokeRect(80, y - 35, 450, 45);
-                
-                // Check icon
-                ctx.fillStyle = accentColors[index];
-                ctx.beginPath();
-                ctx.arc(110, y - 12, 8, 0, Math.PI * 2);
-                ctx.fill();
-                
-                // Text
-                ctx.fillStyle = '#f1f5f9';
-                ctx.fillText(feature.substring(2), 135, y);
-            });
-
-            // CTA Button with enhanced design
-            const btnX = 850;
-            const btnY = 320;
-            const btnWidth = 470;
-            const btnHeight = 80;
-            
-            // Button shadow
-            ctx.shadowColor = 'rgba(102, 126, 234, 0.5)';
-            ctx.shadowBlur = 20;
-            ctx.shadowOffsetY = 5;
-            
-            // Button gradient
-            const btnGradient = ctx.createLinearGradient(btnX, btnY, btnX + btnWidth, btnY);
-            btnGradient.addColorStop(0, '#667eea');
-            btnGradient.addColorStop(1, '#764ba2');
-            ctx.fillStyle = btnGradient;
-            ctx.fillRect(btnX, btnY, btnWidth, btnHeight);
-            
-            ctx.shadowBlur = 0;
-            ctx.shadowOffsetY = 0;
-            
-            // Button border
-            ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
-            ctx.lineWidth = 2;
-            ctx.strokeRect(btnX, btnY, btnWidth, btnHeight);
-            
-            // Button text
-            ctx.fillStyle = 'white';
-            ctx.font = 'bold 34px Arial';
-            const ctaText = data.cta;
-            const ctaMetrics = ctx.measureText(ctaText);
-            const ctaX = btnX + (btnWidth - ctaMetrics.width) / 2;
-            ctx.fillText(ctaText, ctaX, btnY + 50);
-            
-            // Arrow icon
-            ctx.strokeStyle = 'white';
-            ctx.lineWidth = 3;
-            ctx.beginPath();
-            ctx.moveTo(btnX + btnWidth - 50, btnY + 35);
-            ctx.lineTo(btnX + btnWidth - 30, btnY + 40);
-            ctx.lineTo(btnX + btnWidth - 50, btnY + 45);
-            ctx.stroke();
-            ctx.beginPath();
-            ctx.moveTo(btnX + btnWidth - 50, btnY + 40);
-            ctx.lineTo(btnX + btnWidth - 30, btnY + 40);
-            ctx.stroke();
-
-            // Version/Copyright text
-            ctx.fillStyle = '#475569';
-            ctx.font = '16px Arial';
-            ctx.fillText('v2.0.0 | © 2025 JSON-LD Checker', 80, 535);
-        }
-
-        function drawTechTemplateSmall(ctx, data) {
-            // Scale factor
-            const scale = 440 / 1400;
-            
-            // Dark background with subtle gradient
-            const bgGradient = ctx.createLinearGradient(0, 0, 440, 280);
-            bgGradient.addColorStop(0, '#0a0e27');
-            bgGradient.addColorStop(1, '#1a1f3a');
-            ctx.fillStyle = bgGradient;
-            ctx.fillRect(0, 0, 440, 280);
-
-            // Simplified grid pattern
-            ctx.strokeStyle = 'rgba(100, 116, 255, 0.15)';
-            ctx.lineWidth = 1;
-            for (let i = 0; i < 440; i += 30) {
-                ctx.beginPath();
-                ctx.moveTo(i, 0);
-                ctx.lineTo(i, 280);
-                ctx.stroke();
-            }
-            for (let i = 0; i < 280; i += 30) {
-                ctx.beginPath();
-                ctx.moveTo(0, i);
-                ctx.lineTo(440, i);
-                ctx.stroke();
-            }
-
-            // Glowing circles
-            const circles = [
-                {x: 60, y: 50, r: 40, color: 'rgba(102, 126, 234, 0.4)'},
-                {x: 380, y: 220, r: 50, color: 'rgba(118, 75, 162, 0.35)'},
-                {x: 240, y: 140, r: 30, color: 'rgba(59, 130, 246, 0.3)'}
-            ];
-
-            circles.forEach(circle => {
-                const gradient = ctx.createRadialGradient(circle.x, circle.y, 0, circle.x, circle.y, circle.r);
-                gradient.addColorStop(0, circle.color);
-                gradient.addColorStop(1, 'transparent');
-                ctx.fillStyle = gradient;
-                ctx.beginPath();
-                ctx.arc(circle.x, circle.y, circle.r, 0, Math.PI * 2);
-                ctx.fill();
-            });
-
-            // Logo/Icon area
-            const iconX = 30;
-            const iconY = 30;
-            const iconSize = 45;
-            
-            // Icon background
-            ctx.fillStyle = 'rgba(102, 126, 234, 0.15)';
-            ctx.fillRect(iconX, iconY, iconSize, iconSize);
-            
-            // Icon border
-            const iconBorderGradient = ctx.createLinearGradient(iconX, iconY, iconX + iconSize, iconY + iconSize);
-            iconBorderGradient.addColorStop(0, '#667eea');
-            iconBorderGradient.addColorStop(1, '#764ba2');
-            ctx.strokeStyle = iconBorderGradient;
-            ctx.lineWidth = 2;
-            ctx.strokeRect(iconX, iconY, iconSize, iconSize);
-
-            // Code brackets icon
-            ctx.strokeStyle = '#667eea';
-            ctx.lineWidth = 3;
-            ctx.beginPath();
-            ctx.moveTo(iconX + 12, iconY + 13);
-            ctx.lineTo(iconX + 7, iconY + 22);
-            ctx.lineTo(iconX + 12, iconY + 31);
-            ctx.stroke();
-            
-            ctx.beginPath();
-            ctx.moveTo(iconX + 33, iconY + 13);
-            ctx.lineTo(iconX + 38, iconY + 22);
-            ctx.lineTo(iconX + 33, iconY + 31);
-            ctx.stroke();
-            
-            ctx.strokeStyle = '#764ba2';
-            ctx.lineWidth = 2;
-            ctx.beginPath();
-            ctx.moveTo(iconX + 26, iconY + 15);
-            ctx.lineTo(iconX + 19, iconY + 29);
-            ctx.stroke();
-
-            // FREE Badge
-            ctx.fillStyle = 'rgba(16, 185, 129, 0.2)';
-            ctx.fillRect(350, 15, 70, 25);
-            ctx.strokeStyle = '#10b981';
-            ctx.lineWidth = 1.5;
-            ctx.strokeRect(350, 15, 70, 25);
-            ctx.fillStyle = '#10b981';
-            ctx.font = 'bold 14px Arial';
-            ctx.fillText('FREE', 360, 32);
-
-            // Title
-            ctx.shadowColor = '#667eea';
-            ctx.shadowBlur = 15;
-            ctx.fillStyle = '#ffffff';
-            ctx.font = 'bold 32px Arial';
-            ctx.fillText(data.title, 90, 55);
-            ctx.shadowBlur = 0;
-
-            // Accent line
-            const lineGradient = ctx.createLinearGradient(90, 0, 300, 0);
-            lineGradient.addColorStop(0, '#667eea');
-            lineGradient.addColorStop(0.5, '#764ba2');
-            lineGradient.addColorStop(1, 'rgba(118, 75, 162, 0)');
-            ctx.fillStyle = lineGradient;
-            ctx.fillRect(90, 65, 210, 3);
-
-            // Subtitle
-            ctx.fillStyle = '#cbd5e1';
-            ctx.font = '14px Arial';
-            ctx.fillText(data.subtitle, 90, 90);
-
-            // Features (show only 3)
-            ctx.font = 'bold 12px Arial';
-            const accentColors = ['#667eea', '#764ba2', '#3b82f6', '#10b981'];
-            
-            for (let i = 0; i < Math.min(3, data.features.length); i++) {
-                const y = 120 + i * 30;
-                const feature = data.features[i];
-                
-                // Feature card
-                const cardGradient = ctx.createLinearGradient(30, y - 15, 30, y + 5);
-                cardGradient.addColorStop(0, 'rgba(102, 126, 234, 0.15)');
-                cardGradient.addColorStop(1, 'rgba(102, 126, 234, 0.05)');
-                ctx.fillStyle = cardGradient;
-                ctx.fillRect(30, y - 15, 180, 22);
-                
-                // Left accent
-                ctx.fillStyle = accentColors[i];
-                ctx.fillRect(30, y - 15, 3, 22);
-                
-                // Border
-                ctx.strokeStyle = 'rgba(102, 126, 234, 0.3)';
-                ctx.lineWidth = 0.5;
-                ctx.strokeRect(30, y - 15, 180, 22);
-                
-                // Check icon
-                ctx.fillStyle = accentColors[i];
-                ctx.beginPath();
-                ctx.arc(45, y - 4, 4, 0, Math.PI * 2);
-                ctx.fill();
-                
-                // Text
-                ctx.fillStyle = '#f1f5f9';
-                ctx.fillText(feature.substring(2), 55, y);
-            }
-
-            // CTA Button
-            const btnX = 240;
-            const btnY = 120;
-            const btnWidth = 170;
-            const btnHeight = 45;
-            
-            ctx.shadowColor = 'rgba(102, 126, 234, 0.5)';
-            ctx.shadowBlur = 10;
-            ctx.shadowOffsetY = 3;
-            
-            const btnGradient = ctx.createLinearGradient(btnX, btnY, btnX + btnWidth, btnY);
-            btnGradient.addColorStop(0, '#667eea');
-            btnGradient.addColorStop(1, '#764ba2');
-            ctx.fillStyle = btnGradient;
-            ctx.fillRect(btnX, btnY, btnWidth, btnHeight);
-            
-            ctx.shadowBlur = 0;
-            ctx.shadowOffsetY = 0;
-            
-            ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
-            ctx.lineWidth = 1.5;
-            ctx.strokeRect(btnX, btnY, btnWidth, btnHeight);
-            
             ctx.fillStyle = 'white';
             ctx.font = 'bold 14px Arial';
-            const ctaText = data.cta.length > 25 ? 'Get Started!' : data.cta;
-            const ctaMetrics = ctx.measureText(ctaText);
-            const ctaX = btnX + (btnWidth - ctaMetrics.width) / 2;
-            ctx.fillText(ctaText, ctaX, btnY + 28);
+            ctx.textAlign = 'center';
+            ctx.fillText(data.cta, btnX + btnW / 2, btnY + 24);
 
-            // Version text
-            ctx.fillStyle = '#475569';
-            ctx.font = '10px Arial';
-            ctx.fillText('v2.0.0 | © 2025', 30, 265);
+            // Bottom accent
+            ctx.fillStyle = 'rgba(255,255,255,0.15)';
+            ctx.fillRect(0, h - 4, w, 4);
         }
 
-        function drawModernTemplateSmall(ctx, data) {
-            const gradient = ctx.createLinearGradient(0, 0, 440, 280);
-            gradient.addColorStop(0, '#667eea');
-            gradient.addColorStop(1, '#764ba2');
-            ctx.fillStyle = gradient;
-            ctx.fillRect(0, 0, 440, 280);
+        function render() {
+            const lang = document.getElementById('language').value;
+            const data = content[lang];
 
-            ctx.globalAlpha = 0.1;
-            for (let i = 0; i < 10; i++) {
-                ctx.fillStyle = 'white';
-                ctx.beginPath();
-                ctx.arc(Math.random() * 440, Math.random() * 280, Math.random() * 50, 0, Math.PI * 2);
-                ctx.fill();
-            }
-            ctx.globalAlpha = 1;
+            const large = document.getElementById('largeCanvas');
+            const small = document.getElementById('smallCanvas');
+            const ctxL = large.getContext('2d', { alpha: false });
+            const ctxS = small.getContext('2d', { alpha: false });
 
-            ctx.fillStyle = 'rgba(255, 255, 255, 0.2)';
-            ctx.beginPath();
-            ctx.arc(80, 80, 40, 0, Math.PI * 2);
-            ctx.fill();
-
-            ctx.strokeStyle = 'white';
-            ctx.lineWidth = 4;
-            ctx.beginPath();
-            ctx.moveTo(60, 65);
-            ctx.lineTo(50, 80);
-            ctx.lineTo(60, 95);
-            ctx.stroke();
-            ctx.beginPath();
-            ctx.moveTo(100, 65);
-            ctx.lineTo(110, 80);
-            ctx.lineTo(100, 95);
-            ctx.stroke();
-            ctx.lineWidth = 3;
-            ctx.beginPath();
-            ctx.moveTo(85, 70);
-            ctx.lineTo(75, 90);
-            ctx.stroke();
-
-            ctx.fillStyle = 'white';
-            ctx.font = 'bold 28px Arial';
-            ctx.fillText(data.title, 30, 150);
-
-            ctx.font = '13px Arial';
-            ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
-            ctx.fillText(data.subtitle, 30, 175);
-
-            ctx.font = '11px Arial';
-            for (let i = 0; i < Math.min(2, data.features.length); i++) {
-                ctx.fillText(data.features[i], 30, 200 + i * 20);
-            }
-
-            ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
-            ctx.fillRect(30, 235, 150, 30);
-            ctx.fillStyle = 'white';
-            ctx.font = 'bold 13px Arial';
-            ctx.fillText(data.cta.substring(0, 20), 40, 255);
+            drawLarge(ctxL, data);
+            drawSmall(ctxS, data);
         }
 
-        function drawMinimalTemplateSmall(ctx, data) {
-            ctx.fillStyle = '#ffffff';
-            ctx.fillRect(0, 0, 440, 280);
+        function download(size, format) {
+            const canvas = size === 'large' 
+                ? document.getElementById('largeCanvas') 
+                : document.getElementById('smallCanvas');
+            const dims = size === 'large' ? '1400x560' : '440x280';
+            const ext = format === 'jpeg' ? 'jpg' : 'png';
+            const mime = format === 'jpeg' ? 'image/jpeg' : 'image/png';
 
-            const gradient = ctx.createLinearGradient(0, 0, 440, 0);
-            gradient.addColorStop(0, '#667eea');
-            gradient.addColorStop(1, '#764ba2');
-            ctx.fillStyle = gradient;
-            ctx.fillRect(0, 0, 440, 4);
-
-            ctx.fillStyle = '#667eea';
-            ctx.fillRect(40, 40, 60, 60);
-            ctx.fillStyle = '#764ba2';
-            ctx.beginPath();
-            ctx.arc(70, 70, 30, 0, Math.PI * 2);
-            ctx.fill();
-
-            ctx.fillStyle = '#1e293b';
-            ctx.font = 'bold 30px Arial';
-            ctx.fillText(data.title, 120, 70);
-
-            ctx.fillStyle = gradient;
-            ctx.fillRect(120, 80, 150, 3);
-
-            ctx.fillStyle = '#475569';
-            ctx.font = '14px Arial';
-            ctx.fillText(data.subtitle, 120, 105);
-
-            ctx.font = '12px Arial';
-            ctx.fillStyle = '#64748b';
-            for (let i = 0; i < Math.min(3, data.features.length); i++) {
-                ctx.fillText(data.features[i], 40, 150 + i * 30);
-            }
-
-            ctx.fillStyle = '#1e293b';
-            ctx.font = 'bold 14px Arial';
-            ctx.fillText(data.cta, 40, 250);
-            ctx.fillStyle = gradient;
-            ctx.fillRect(40, 258, 120, 2);
-        }
-
-        function drawVibrantTemplateSmall(ctx, data) {
-            const bg = ctx.createLinearGradient(0, 0, 440, 280);
-            bg.addColorStop(0, '#ff6b6b');
-            bg.addColorStop(0.5, '#48dbfb');
-            bg.addColorStop(1, '#ff9ff3');
-            ctx.fillStyle = bg;
-            ctx.fillRect(0, 0, 440, 280);
-
-            ctx.globalAlpha = 0.3;
-            ctx.fillStyle = '#ffffff';
-            ctx.beginPath();
-            ctx.arc(80, 60, 50, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.fillStyle = '#000000';
-            ctx.beginPath();
-            ctx.arc(360, 200, 60, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.globalAlpha = 1;
-
-            ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
-            ctx.shadowColor = 'rgba(0, 0, 0, 0.2)';
-            ctx.shadowBlur = 15;
-            ctx.shadowOffsetY = 5;
-            ctx.fillRect(30, 30, 380, 220);
-            ctx.shadowBlur = 0;
-            ctx.shadowOffsetY = 0;
-
-            const titleGradient = ctx.createLinearGradient(0, 0, 300, 0);
-            titleGradient.addColorStop(0, '#ff6b6b');
-            titleGradient.addColorStop(0.5, '#48dbfb');
-            titleGradient.addColorStop(1, '#ff9ff3');
-            ctx.fillStyle = titleGradient;
-            ctx.font = 'bold 28px Arial';
-            ctx.fillText(data.title, 50, 75);
-
-            ctx.fillStyle = '#2d3436';
-            ctx.font = '13px Arial';
-            ctx.fillText(data.subtitle, 50, 100);
-
-            ctx.fillStyle = titleGradient;
-            ctx.fillRect(50, 110, 200, 2);
-
-            const colors = ['#ff6b6b', '#feca57', '#48dbfb', '#ff9ff3'];
-            ctx.font = 'bold 11px Arial';
-            for (let i = 0; i < Math.min(3, data.features.length); i++) {
-                const y = 140 + i * 25;
-                ctx.fillStyle = colors[i];
-                ctx.beginPath();
-                ctx.arc(60, y - 4, 4, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.fillStyle = '#2d3436';
-                ctx.fillText(data.features[i].substring(2), 72, y);
-            }
-        }
-
-        function drawCanvas() {
-            const canvas = document.getElementById('promoCanvas');
-            const ctx = canvas.getContext('2d', { alpha: false });
-            
-            const smallCanvas = document.getElementById('smallCanvas');
-            const smallCtx = smallCanvas.getContext('2d', { alpha: false });
-            
-            const data = content[currentLanguage];
-            
-            switch(currentTemplate) {
-                case 'modern':
-                    drawModernTemplate(ctx, data);
-                    drawModernTemplateSmall(smallCtx, data);
-                    break;
-                case 'tech':
-                    drawTechTemplate(ctx, data);
-                    drawTechTemplateSmall(smallCtx, data);
-                    break;
-                case 'minimal':
-                    drawMinimalTemplate(ctx, data);
-                    drawMinimalTemplateSmall(smallCtx, data);
-                    break;
-                case 'vibrant':
-                    drawVibrantTemplate(ctx, data);
-                    drawVibrantTemplateSmall(smallCtx, data);
-                    break;
-            }
-        }
-
-        function regenerate() {
-            drawCanvas();
-        }
-
-        function downloadPNG(size) {
-            const canvas = size === 'large' ? document.getElementById('promoCanvas') : document.getElementById('smallCanvas');
             const link = document.createElement('a');
-            const sizeLabel = size === 'large' ? '1400x560' : '440x280';
-            link.download = `json-ld-checker-${sizeLabel}-${currentTemplate}-${Date.now()}.png`;
-            link.href = canvas.toDataURL('image/png');
+            link.download = `json-ld-checker-${dims}.${ext}`;
+            link.href = canvas.toDataURL(mime, 0.95);
             link.click();
         }
 
-        function downloadJPEG(size) {
-            const canvas = size === 'large' ? document.getElementById('promoCanvas') : document.getElementById('smallCanvas');
-            const link = document.createElement('a');
-            const sizeLabel = size === 'large' ? '1400x560' : '440x280';
-            link.download = `json-ld-checker-${sizeLabel}-${currentTemplate}-${Date.now()}.jpg`;
-            link.href = canvas.toDataURL('image/jpeg', 0.95);
-            link.click();
-        }
-
-        function drawMinimalTemplate(ctx, data) {
-            // Clean white background
-            ctx.fillStyle = '#ffffff';
-            ctx.fillRect(0, 0, 1400, 560);
-
-            // Subtle top accent
-            const gradient = ctx.createLinearGradient(0, 0, 1400, 0);
-            gradient.addColorStop(0, '#667eea');
-            gradient.addColorStop(1, '#764ba2');
-            ctx.fillStyle = gradient;
-            ctx.fillRect(0, 0, 1400, 8);
-
-            // Icon - Simple geometric
-            ctx.fillStyle = '#667eea';
-            ctx.fillRect(100, 100, 150, 150);
-            ctx.fillStyle = '#764ba2';
-            ctx.beginPath();
-            ctx.arc(175, 175, 75, 0, Math.PI * 2);
-            ctx.fill();
-
-            // Title
-            ctx.fillStyle = '#1e293b';
-            ctx.font = 'bold 76px Arial';
-            ctx.fillText(data.title, 320, 180);
-
-            // Underline
-            ctx.fillStyle = gradient;
-            ctx.fillRect(320, 200, 400, 6);
-
-            // Subtitle
-            ctx.fillStyle = '#475569';
-            ctx.font = '34px Arial';
-            ctx.fillText(data.subtitle, 320, 260);
-
-            // Features in grid
-            ctx.font = '28px Arial';
-            ctx.fillStyle = '#64748b';
-            data.features.forEach((feature, index) => {
-                const col = index % 2;
-                const row = Math.floor(index / 2);
-                ctx.fillText(feature, 100 + col * 600, 360 + row * 60);
-            });
-
-            // Simple CTA
-            ctx.fillStyle = '#1e293b';
-            ctx.font = 'bold 32px Arial';
-            ctx.fillText(data.cta, 100, 500);
-            
-            ctx.fillStyle = gradient;
-            ctx.fillRect(100, 515, 300, 4);
-        }
-
-        function drawVibrantTemplate(ctx, data) {
-            // Colorful background
-            const bg = ctx.createLinearGradient(0, 0, 1400, 560);
-            bg.addColorStop(0, '#ff6b6b');
-            bg.addColorStop(0.3, '#feca57');
-            bg.addColorStop(0.6, '#48dbfb');
-            bg.addColorStop(1, '#ff9ff3');
-            ctx.fillStyle = bg;
-            ctx.fillRect(0, 0, 1400, 560);
-
-            // Colorful shapes
-            ctx.globalAlpha = 0.3;
-            ctx.fillStyle = '#ffffff';
-            ctx.beginPath();
-            ctx.arc(200, 150, 120, 0, Math.PI * 2);
-            ctx.fill();
-            
-            ctx.fillStyle = '#000000';
-            ctx.beginPath();
-            ctx.arc(1200, 400, 150, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.globalAlpha = 1;
-
-            // Main card
-            ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
-            ctx.shadowColor = 'rgba(0, 0, 0, 0.2)';
-            ctx.shadowBlur = 30;
-            ctx.shadowOffsetY = 10;
-            ctx.fillRect(80, 80, 1240, 400);
-            ctx.shadowBlur = 0;
-            ctx.shadowOffsetY = 0;
-
-            // Title
-            const titleGradient = ctx.createLinearGradient(0, 0, 800, 0);
-            titleGradient.addColorStop(0, '#ff6b6b');
-            titleGradient.addColorStop(0.5, '#48dbfb');
-            titleGradient.addColorStop(1, '#ff9ff3');
-            ctx.fillStyle = titleGradient;
-            ctx.font = 'bold 70px Arial';
-            ctx.fillText(data.title, 120, 180);
-
-            // Subtitle
-            ctx.fillStyle = '#2d3436';
-            ctx.font = '32px Arial';
-            ctx.fillText(data.subtitle, 120, 240);
-
-            // Colorful line
-            ctx.fillStyle = titleGradient;
-            ctx.fillRect(120, 260, 500, 4);
-
-            // Features with colored bullets
-            const colors = ['#ff6b6b', '#feca57', '#48dbfb', '#ff9ff3'];
-            ctx.font = 'bold 26px Arial';
-            data.features.forEach((feature, index) => {
-                const y = 320 + index * 40;
-                
-                // Colored bullet
-                ctx.fillStyle = colors[index];
-                ctx.beginPath();
-                ctx.arc(130, y - 8, 8, 0, Math.PI * 2);
-                ctx.fill();
-                
-                // Text
-                ctx.fillStyle = '#2d3436';
-                ctx.fillText(feature.substring(2), 160, y);
-            });
-        }
-
-        // Template selection
-        document.querySelectorAll('.template-card').forEach(card => {
-            card.addEventListener('click', function() {
-                document.querySelectorAll('.template-card').forEach(c => c.classList.remove('active'));
-                this.classList.add('active');
-                currentTemplate = this.dataset.template;
-                drawCanvas();
-            });
-        });
-
-        // Language selection
-        document.getElementById('language').addEventListener('change', function() {
-            currentLanguage = this.value;
-            drawCanvas();
-        });
-
-        // Initial draw
-        drawCanvas();
+        document.getElementById('language').addEventListener('change', render);
+        render();
     </script>
 </body>
 </html>
