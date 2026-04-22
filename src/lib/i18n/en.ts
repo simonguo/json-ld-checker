@@ -32,6 +32,8 @@ export default {
   clearSearch: 'Clear search',
   searchResults: '{count} results found',
   noSearchResults: 'No results found',
+  jsonParseError: 'JSON Parse Error',
+  editToValidate: 'Edit JSON to validate',
 
   // Validation
   validationPassed: 'Validation Passed',
@@ -47,6 +49,11 @@ export default {
   googleTest: 'Google Test',
   googleTestTitle: 'Test with Google Rich Results',
   suggestionLabel: 'Suggestion',
+  schemaDocs: 'Docs',
+  schemaOrgDocsTitle: 'View Schema.org Documentation',
+  export: 'Export',
+  exportJson: 'Export JSON-LD as JSON file',
+  exportValidation: 'Export validation results',
 
   // No JSON-LD
   noJsonLdFound: 'No JSON-LD Found',
@@ -172,6 +179,15 @@ export default {
   configCleared: 'Configuration cleared',
   clearFailed: 'Clear failed',
 
+  // Onboarding
+  welcomeTitle: 'Welcome to JSON-LD Checker! 🎉',
+  welcomeDesc: 'This extension helps you inspect, validate, and improve JSON-LD structured data on any webpage. Here\'s how to get started:',
+  onboardStep1: 'Visit any webpage — the extension auto-detects JSON-LD',
+  onboardStep2: 'Open the side panel to inspect structured data in the tree or raw view',
+  onboardStep3: 'Use the Validation tab to check for errors and SEO issues',
+  onboardStep4: 'Configure an AI API key below to unlock AI-powered analysis',
+  getStarted: 'Got it, let\'s start!',
+
   // Footer
   contact: 'Contact',
   reportBug: 'Report Bug',
@@ -184,6 +200,19 @@ export default {
   // Icon titles
   iconTitleFound: 'JSON-LD Checker - Found {count} JSON-LD',
   iconTitleNotFound: 'JSON-LD Checker - No JSON-LD found',
+
+  // History
+  history: 'History',
+  noHistory: 'No History',
+  noHistoryDesc: 'Pages with JSON-LD you visit will appear here',
+  historyCount: '{count} pages visited',
+  clearHistory: 'Clear History',
+  openPage: 'Open Page',
+  valid: 'Valid',
+  justNow: 'Just now',
+  minutesAgo: '{count}m ago',
+  hoursAgo: '{count}h ago',
+  daysAgo: '{count}d ago',
 
   // Update Notifications
   updateAvailable: 'Update Available!',

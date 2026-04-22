@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { JSONTree } from 'react-json-tree';
-import { Search, X, Code2, TreePine, Copy, Check } from 'lucide-react';
+import { Search, X, Code2, TreePine, Copy, Check, Edit3, Download } from 'lucide-react';
 import { useI18n } from '@/lib/i18n';
+import { validator } from '@/lib/validator';
 
 interface TreeViewProps {
   data: any;
@@ -30,11 +31,15 @@ const theme = {
 };
 
 export const TreeView: React.FC<TreeViewProps> = ({ data }) => {
-  const { t } = useI18n();
+  const { t, lang } = useI18n();
   const [searchTerm, setSearchTerm] = useState('');
   const [viewMode, setViewMode] = useState<'tree' | 'raw'>('tree');
   const [copied, setCopied] = useState(false);
-  
+  const [editText, setEditText] = useState<string>(() => JSON.stringify(data, null, 2));
+  const [editParseError, setEditParseError] = useState<string | null>(null);
+  const [editValidation, setEditValidation] = useState<{ errors: number; warnings: number } | null>(null);
+  const [editCopied, setEditCopied] = useState(false);
+
   const handleCopyRaw = async () => {
     try {
       const jsonString = JSON.stringify(data, null, 2);
@@ -45,11 +50,45 @@ export const TreeView: React.FC<TreeViewProps> = ({ data }) => {
       console.error('Failed to copy:', err);
     }
   };
+
+  const handleEditCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(editText);
+      setEditCopied(true);
+      setTimeout(() => setEditCopied(false), 2000);
+    } catch (err) {
+      console.error('Failed to copy:', err);
+    }
+  };
+
+  const handleEditChange = useCallback((value: string) => {
+    setEditText(value);
+    try {
+      const parsed = JSON.parse(value);
+      setEditParseError(null);
+      const results = validator.validate(parsed, lang);
+      setEditValidation({ errors: results.errors.length, warnings: results.warnings.length });
+    } catch (e: any) {
+      setEditParseError(e.message);
+      setEditValidation(null);
+    }
+  }, [lang]);
   
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value);
   };
   
+  const handleExport = () => {
+    const content = viewMode === 'raw' ? editText : JSON.stringify(data, null, 2);
+    const blob = new Blob([content], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'json-ld.json';
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
   const handleClearSearch = () => {
     setSearchTerm('');
   };
@@ -95,7 +134,12 @@ export const TreeView: React.FC<TreeViewProps> = ({ data }) => {
             {t('treeView')}
           </button>
           <button
-            onClick={() => setViewMode('raw')}
+            onClick={() => {
+              setViewMode('raw');
+              setEditText(JSON.stringify(data, null, 2));
+              setEditParseError(null);
+              setEditValidation(null);
+            }}
             className={`flex items-center gap-1.5 px-3 py-1.5 text-sm rounded-lg transition-all ${
               viewMode === 'raw'
                 ? 'bg-primary-500 text-white shadow-sm'
@@ -108,14 +152,14 @@ export const TreeView: React.FC<TreeViewProps> = ({ data }) => {
           
           {viewMode === 'raw' && (
             <button
-              onClick={handleCopyRaw}
+              onClick={handleEditCopy}
               className={`ml-auto flex items-center gap-1.5 px-3 py-1.5 text-sm rounded-lg transition-all ${
-                copied
+                editCopied
                   ? 'bg-green-50 text-green-600 border border-green-200'
                   : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
               }`}
             >
-              {copied ? (
+              {editCopied ? (
                 <>
                   <Check className="w-4 h-4" />
                   {t('copied')}
@@ -128,6 +172,13 @@ export const TreeView: React.FC<TreeViewProps> = ({ data }) => {
               )}
             </button>
           )}
+          <button
+            onClick={handleExport}
+            className="flex items-center gap-1.5 px-3 py-1.5 text-sm rounded-lg bg-gray-100 text-gray-600 hover:bg-gray-200 transition-all"
+            title={t('exportJson')}
+          >
+            <Download className="w-4 h-4" />
+          </button>
         </div>
         
         {/* Search bar - only show in tree mode */}
@@ -229,10 +280,37 @@ export const TreeView: React.FC<TreeViewProps> = ({ data }) => {
             />
           </div>
         ) : (
-          <div className="bg-gray-50 p-4">
-            <pre className="text-sm text-gray-800 font-mono whitespace-pre-wrap break-words">
-              {JSON.stringify(data, null, 2)}
-            </pre>
+          <div className="bg-gray-50">
+            {/* Live validation status bar */}
+            <div className={`flex items-center gap-2 px-3 py-1.5 text-xs border-b ${
+              editParseError
+                ? 'bg-red-50 border-red-200 text-red-700'
+                : editValidation && editValidation.errors > 0
+                ? 'bg-orange-50 border-orange-200 text-orange-700'
+                : 'bg-green-50 border-green-200 text-green-700'
+            }`}>
+              <Edit3 className="w-3 h-3 flex-shrink-0" />
+              {editParseError ? (
+                <span>{t('jsonParseError')}: {editParseError}</span>
+              ) : editValidation ? (
+                <span>
+                  {editValidation.errors > 0
+                    ? `${editValidation.errors} ${t('errors')}${editValidation.warnings > 0 ? `, ${editValidation.warnings} ${t('warnings')}` : ''}`
+                    : editValidation.warnings > 0
+                    ? `${editValidation.warnings} ${t('warnings')}`
+                    : t('validationPassed')}
+                </span>
+              ) : (
+                <span>{t('editToValidate')}</span>
+              )}
+            </div>
+            <textarea
+              value={editText}
+              onChange={(e) => handleEditChange(e.target.value)}
+              className="w-full text-sm text-gray-800 font-mono p-4 bg-gray-50 border-0 outline-none resize-none"
+              style={{ minHeight: 'calc(100vh - 380px)', tabSize: 2 }}
+              spellCheck={false}
+            />
           </div>
         )}
       </div>

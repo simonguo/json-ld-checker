@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import ReactMarkdown from 'react-markdown';
 import { useI18n } from '@/lib/i18n';
 import { aiService } from '@/lib/ai-service';
 import Loader from '@/components/Loader';
+import { MarkdownRenderer } from '@/components/MarkdownRenderer';
 
 export const AiSuggestView: React.FC = () => {
   const { t } = useI18n();
@@ -136,8 +136,8 @@ export const AiSuggestView: React.FC = () => {
               {t('regenerate')}
             </button>
           </div>
-          <div className="prose max-w-none bg-white p-4 rounded-lg border border-gray-200">
-            <ReactMarkdown>{result}</ReactMarkdown>
+          <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+            <MarkdownRenderer className="p-4">{result}</MarkdownRenderer>
           </div>
         </div>
       )}

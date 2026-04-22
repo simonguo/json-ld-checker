@@ -54,6 +54,22 @@ export class JsonLdValidator {
     HowTo: ['name', 'step'],
     Review: ['itemReviewed', 'reviewRating', 'author'],
     AggregateRating: ['ratingValue', 'reviewCount'],
+    // Extended types
+    JobPosting: ['title', 'description', 'hiringOrganization', 'jobLocation', 'datePosted'],
+    Course: ['name', 'description', 'provider'],
+    SoftwareApplication: ['name', 'operatingSystem', 'applicationCategory'],
+    MusicRecording: ['name', 'byArtist'],
+    Movie: ['name', 'director'],
+    Book: ['name', 'author'],
+    Restaurant: ['name', 'address', 'servesCuisine'],
+    FoodEstablishment: ['name', 'address'],
+    Service: ['name', 'provider'],
+    MedicalCondition: ['name'],
+    SportsEvent: ['name', 'startDate', 'location'],
+    EducationalOrganization: ['name'],
+    CollegeOrUniversity: ['name'],
+    LodgingBusiness: ['name', 'address'],
+    ItemList: ['itemListElement'],
   };
 
   private recommendedProperties: Record<string, string[]> = {
@@ -67,6 +83,16 @@ export class JsonLdValidator {
     Event: ['description', 'image', 'offers', 'performer', 'organizer'],
     Recipe: ['image', 'author', 'datePublished', 'prepTime', 'cookTime', 'recipeYield', 'nutrition'],
     VideoObject: ['duration', 'contentUrl', 'embedUrl', 'interactionStatistic'],
+    // Extended types
+    JobPosting: ['validThrough', 'employmentType', 'baseSalary', 'experienceRequirements', 'educationRequirements'],
+    Course: ['url', 'courseCode', 'hasCourseInstance', 'teaches'],
+    SoftwareApplication: ['offers', 'aggregateRating', 'screenshot', 'softwareVersion'],
+    MusicRecording: ['duration', 'inAlbum', 'url'],
+    Movie: ['actor', 'genre', 'datePublished', 'image'],
+    Book: ['isbn', 'publisher', 'datePublished', 'numberOfPages'],
+    Restaurant: ['url', 'telephone', 'priceRange', 'openingHours', 'image'],
+    FoodEstablishment: ['telephone', 'priceRange', 'openingHours', 'image', 'servesCuisine'],
+    Service: ['description', 'areaServed', 'serviceType', 'url'],
   };
 
   validate(jsonLdData: any, userLanguage?: string): ValidationResults {

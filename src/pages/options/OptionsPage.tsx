@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Save, Key, Globe, Eye, EyeOff, Trash2, Info, Shield, RefreshCw } from 'lucide-react';
+import { Save, Key, Globe, Eye, EyeOff, Trash2, Info, Shield, RefreshCw, Rocket, X } from 'lucide-react';
 import { useI18n } from '@/lib/i18n';
 import { AI_PROVIDERS, getProviderApiKeyLink, ProviderKey, AIModel } from '@/config/ai-providers';
 import { aiService } from '@/lib/ai-service';
@@ -36,6 +36,7 @@ export default function OptionsPage() {
   const [ollamaModels, setOllamaModels] = useState<AIModel[]>([]);
   const [fetchingModels, setFetchingModels] = useState(false);
   const [ollamaFetchError, setOllamaFetchError] = useState<string | null>(null);
+  const [showOnboarding, setShowOnboarding] = useState(false);
   const { t } = useI18n(settings.language);
 
   const models =
@@ -101,6 +102,7 @@ export default function OptionsPage() {
       'azure_endpoint',
       'azure_deployment',
       'user_language',
+      'onboarding_done',
     ]);
 
     setSettings({
@@ -112,6 +114,18 @@ export default function OptionsPage() {
       azureDeployment: result.azure_deployment || '',
       language: result.user_language || 'auto',
     });
+
+    // Show onboarding if this is a fresh install (no API key configured yet and not dismissed)
+    if (!result.onboarding_done && !result.api_key) {
+      setShowOnboarding(true);
+    }
+  };
+
+  const handleDismissOnboarding = async () => {
+    setShowOnboarding(false);
+    if (typeof chrome !== 'undefined' && chrome.storage) {
+      await chrome.storage.local.set({ onboarding_done: true });
+    }
   };
 
   const handleProviderChange = (provider: ProviderKey) => {
@@ -247,6 +261,49 @@ export default function OptionsPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="p-6 max-w-4xl mx-auto space-y-6">
+
+        {/* Onboarding Banner */}
+        {showOnboarding && (
+          <div className="bg-gradient-to-r from-primary-500 to-primary-600 rounded-lg shadow-sm p-6 text-white relative">
+            <button
+              onClick={handleDismissOnboarding}
+              className="absolute top-3 right-3 p-1.5 rounded-lg hover:bg-white/20 transition-colors"
+            >
+              <X size={16} />
+            </button>
+            <div className="flex items-start gap-4">
+              <div className="flex-shrink-0 w-12 h-12 bg-white/20 rounded-full flex items-center justify-center">
+                <Rocket size={24} />
+              </div>
+              <div className="flex-1 min-w-0">
+                <h2 className="text-lg font-bold mb-1">{t('welcomeTitle')}</h2>
+                <p className="text-white/90 text-sm mb-4">{t('welcomeDesc')}</p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {[
+                    { step: '1', text: t('onboardStep1') },
+                    { step: '2', text: t('onboardStep2') },
+                    { step: '3', text: t('onboardStep3') },
+                    { step: '4', text: t('onboardStep4') },
+                  ].map(({ step, text }) => (
+                    <div key={step} className="flex items-center gap-2 bg-white/10 rounded-lg px-3 py-2">
+                      <span className="flex-shrink-0 w-6 h-6 bg-white/30 rounded-full text-xs font-bold flex items-center justify-center">
+                        {step}
+                      </span>
+                      <span className="text-sm">{text}</span>
+                    </div>
+                  ))}
+                </div>
+                <button
+                  onClick={handleDismissOnboarding}
+                  className="mt-4 bg-white text-primary-600 px-4 py-2 rounded-lg text-sm font-medium hover:bg-white/90 transition-colors"
+                >
+                  {t('getStarted')}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Page Header */}
         <div className="bg-white rounded-lg shadow-sm p-6">
           <div className="flex items-center gap-3 mb-2">

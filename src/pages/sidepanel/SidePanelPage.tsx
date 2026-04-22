@@ -1,15 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import { Code, CheckCircle2, Lightbulb, Wand2 } from 'lucide-react';
+import { Code, CheckCircle2, Lightbulb, Wand2, History } from 'lucide-react';
 import Header from '@/components/Header';
 import Loader from '@/components/Loader';
 import TabButton from '@/components/TabButton';
 import { useI18n } from '@/lib/i18n';
 import { aiService } from '@/lib/ai-service';
 import { validator } from '@/lib/validator';
+import { addHistoryEntry } from '@/lib/history';
 import { TreeView } from './TreeView';
 import { ValidationView } from './ValidationView';
 import { AiCheckView } from './AiCheckView';
 import { AiSuggestView } from './AiSuggestView';
+import { HistoryView } from './HistoryView';
 
 interface JsonLdData {
   found: boolean;
@@ -105,6 +107,28 @@ export default function SidePanelPage() {
         setJsonData(response);
         if (response.data && response.data.length > 0) {
           setSelectedIndex(0);
+          // Save to history
+          try {
+            const allErrors = response.data.reduce((sum: number, item: any) => sum + validator.validate(item).errors.length, 0);
+            const allWarnings = response.data.reduce((sum: number, item: any) => sum + validator.validate(item).warnings.length, 0);
+            const allSuggestions = response.data.reduce((sum: number, item: any) => sum + validator.validate(item).suggestions.length, 0);
+            const types = response.data.flatMap((item: any) => {
+              const t = item['@type'];
+              return t ? (Array.isArray(t) ? t : [t]) : [];
+            });
+            await addHistoryEntry({
+              url: tab.url || '',
+              title: tab.title || '',
+              timestamp: Date.now(),
+              jsonLdCount: response.count,
+              errorCount: allErrors,
+              warningCount: allWarnings,
+              suggestionCount: allSuggestions,
+              types: [...new Set(types)] as string[],
+            });
+          } catch (histErr) {
+            console.error('Failed to save history:', histErr);
+          }
         }
       } else {
         setJsonData({
@@ -194,6 +218,13 @@ export default function SidePanelPage() {
             >
               {t('aiSuggest')}
             </TabButton>
+            <TabButton
+              active={currentTab === 'history'}
+              onClick={() => setCurrentTab('history')}
+              icon={<History className="w-4 h-4" />}
+            >
+              {t('history')}
+            </TabButton>
           </div>
         </div>
         
@@ -202,6 +233,8 @@ export default function SidePanelPage() {
           <div className="p-4">
             {currentTab === 'aiSuggest' ? (
               <AiSuggestView />
+            ) : currentTab === 'history' ? (
+              <HistoryView />
             ) : (
               <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
                 <div className="text-center">
@@ -301,6 +334,13 @@ export default function SidePanelPage() {
           >
             {t('aiSuggest')}
           </TabButton>
+          <TabButton
+            active={currentTab === 'history'}
+            onClick={() => setCurrentTab('history')}
+            icon={<History className="w-4 h-4" />}
+          >
+            {t('history')}
+          </TabButton>
         </div>
       </div>
       
@@ -311,6 +351,7 @@ export default function SidePanelPage() {
           {currentTab === 'validation' && <ValidationView data={selectedData} />}
           {currentTab === 'aiCheck' && <AiCheckView data={selectedData} />}
           {currentTab === 'aiSuggest' && <AiSuggestView />}
+          {currentTab === 'history' && <HistoryView />}
         </div>
       </div>
     </div>
