@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ExternalLink } from 'lucide-react';
+import { ExternalLink, Download } from 'lucide-react';
 import { validator } from '@/lib/validator';
 import { useI18n } from '@/lib/i18n';
 
@@ -27,6 +27,12 @@ export const ValidationView: React.FC<ValidationViewProps> = ({ data }) => {
   const results = validator.validate(data, lang);
   const summary = validator.getSummary(results);
 
+  // Extract schema type for schema.org link
+  const schemaType = data['@type']
+    ? (Array.isArray(data['@type']) ? data['@type'][0] : data['@type'])
+    : null;
+  const schemaOrgUrl = schemaType ? `https://schema.org/${schemaType}` : null;
+
   const getResultClass = (type: string) => {
     switch (type) {
       case 'error': return 'text-red-600 bg-red-50 border-red-200';
@@ -44,6 +50,31 @@ export const ValidationView: React.FC<ValidationViewProps> = ({ data }) => {
     }
   };
 
+  const handleExportValidation = () => {
+    const exportData = {
+      url: pageUrl,
+      timestamp: new Date().toISOString(),
+      schema_type: schemaType,
+      summary: {
+        isValid: summary.isValid,
+        errors: summary.errors,
+        warnings: summary.warnings,
+        suggestions: summary.suggestions,
+      },
+      errors: results.errors,
+      warnings: results.warnings,
+      suggestions: results.suggestions,
+      info: results.info,
+    };
+    const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `validation-${schemaType || 'results'}-${Date.now()}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
@@ -57,15 +88,37 @@ export const ValidationView: React.FC<ValidationViewProps> = ({ data }) => {
             <span className="text-blue-600">{summary.suggestions} {t('suggestions')}</span>
           </div>
         </div>
-        <button
-          onClick={handleGoogleTest}
-          disabled={!pageUrl}
-          className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-primary-600 bg-primary-50 hover:bg-primary-100 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-          title={t('googleTestTitle')}
-        >
-          <ExternalLink className="w-3.5 h-3.5" />
-          {t('googleTest')}
-        </button>
+        <div className="flex flex-col gap-1.5 items-end">
+          <button
+            onClick={handleGoogleTest}
+            disabled={!pageUrl}
+            className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-primary-600 bg-primary-50 hover:bg-primary-100 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            title={t('googleTestTitle')}
+          >
+            <ExternalLink className="w-3.5 h-3.5" />
+            {t('googleTest')}
+          </button>
+          {schemaOrgUrl && (
+            <a
+              href={schemaOrgUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+              title={t('schemaOrgDocsTitle')}
+            >
+              <ExternalLink className="w-3.5 h-3.5" />
+              {schemaType} {t('schemaDocs')}
+            </a>
+          )}
+          <button
+            onClick={handleExportValidation}
+            className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+            title={t('exportValidation')}
+          >
+            <Download className="w-3.5 h-3.5" />
+            {t('export')}
+          </button>
+        </div>
       </div>
 
       {[...results.errors, ...results.warnings, ...results.suggestions, ...results.info]

@@ -1,5 +1,7 @@
 // Background service worker
 
+import { validator } from './lib/validator';
+
 // Debug: Log UI language
 const uiLang = chrome.i18n.getUILanguage ? chrome.i18n.getUILanguage() : 'unknown';
 console.log('[Background] Chrome UI Language:', uiLang);
@@ -154,14 +156,38 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     console.log('[Background] Tab ID:', tabId, 'JSON-LD found:', request.data.found, 'Count:', request.data.count);
     tabData.set(tabId, request.data);
     
-    // Update icon based on whether JSON-LD was found
+    // Update icon based on whether JSON-LD was found, and whether it has errors
     if (request.data.found) {
-      console.log('[Background] Setting active icon for tab', tabId);
+      // Run validation to determine if there are errors
+      let hasErrors = false;
+      let totalErrors = 0;
+      if (request.data.data && Array.isArray(request.data.data)) {
+        for (const item of request.data.data) {
+          const results = validator.validate(item);
+          if (results.errors.length > 0) {
+            hasErrors = true;
+            totalErrors += results.errors.length;
+          }
+        }
+      }
+
+      console.log('[Background] Setting active icon for tab', tabId, 'hasErrors:', hasErrors);
       chrome.action.setIcon({ tabId, path: ICON_ACTIVE }).then(() => {
         console.log('[Background] Active icon set successfully');
       }).catch((error) => {
         console.error('[Background] Error setting active icon:', error);
       });
+
+      if (hasErrors) {
+        // Red badge showing error count
+        chrome.action.setBadgeText({ tabId, text: '!' });
+        chrome.action.setBadgeBackgroundColor({ tabId, color: '#ef4444' });
+      } else {
+        // Green badge showing JSON-LD count
+        chrome.action.setBadgeText({ tabId, text: request.data.count.toString() });
+        chrome.action.setBadgeBackgroundColor({ tabId, color: '#22c55e' });
+      }
+
       chrome.action.setTitle({ 
         tabId, 
         title: chrome.i18n.getMessage('iconTitleFound', [request.data.count.toString()])
@@ -173,6 +199,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       }).catch((error) => {
         console.error('[Background] Error setting inactive icon:', error);
       });
+      chrome.action.setBadgeText({ tabId, text: '' });
       chrome.action.setTitle({ 
         tabId, 
         title: chrome.i18n.getMessage('iconTitleNotFound')

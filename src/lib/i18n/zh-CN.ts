@@ -32,6 +32,8 @@ export default {
   clearSearch: '清除搜索',
   searchResults: '找到 {count} 个结果',
   noSearchResults: '未找到结果',
+  jsonParseError: 'JSON 解析错误',
+  editToValidate: '编辑 JSON 以验证',
 
   // Validation
   validationPassed: '验证通过',
@@ -47,6 +49,11 @@ export default {
   googleTest: 'Google 测试',
   googleTestTitle: '使用 Google 富媒体结果测试',
   suggestionLabel: '建议',
+  schemaDocs: '文档',
+  schemaOrgDocsTitle: '查看 Schema.org 文档',
+  export: '导出',
+  exportJson: '导出 JSON-LD 为 JSON 文件',
+  exportValidation: '导出验证结果',
 
   // No JSON-LD
   noJsonLdFound: '未发现 JSON-LD',
@@ -172,6 +179,15 @@ export default {
   configCleared: '配置已清除',
   clearFailed: '清除失败',
 
+  // Onboarding
+  welcomeTitle: '欢迎使用 JSON-LD Checker！🎉',
+  welcomeDesc: '此扩展帮助您检查、验证和改进任何网页上的 JSON-LD 结构化数据。以下是使用入门指南：',
+  onboardStep1: '访问任意网页 — 扩展自动检测 JSON-LD',
+  onboardStep2: '打开侧边栏，在树形或原始视图中检查结构化数据',
+  onboardStep3: '使用"验证"标签页检查错误和 SEO 问题',
+  onboardStep4: '在下方配置 AI API Key 以解锁 AI 分析功能',
+  getStarted: '明白了，开始使用！',
+
   // Footer
   contact: '联系我们',
   reportBug: '报告问题',
@@ -184,6 +200,19 @@ export default {
   // Icon titles
   iconTitleFound: 'JSON-LD Checker - 发现 {count} 个 JSON-LD',
   iconTitleNotFound: 'JSON-LD Checker - 未发现 JSON-LD',
+
+  // History
+  history: '历史记录',
+  noHistory: '暂无历史记录',
+  noHistoryDesc: '您访问过的含有 JSON-LD 的页面将在此显示',
+  historyCount: '已访问 {count} 个页面',
+  clearHistory: '清除历史',
+  openPage: '打开页面',
+  valid: '有效',
+  justNow: '刚刚',
+  minutesAgo: '{count} 分钟前',
+  hoursAgo: '{count} 小时前',
+  daysAgo: '{count} 天前',
 
   // Update Notifications
   updateAvailable: '发现新版本！',
