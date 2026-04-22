@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Save, Key, Globe, Eye, EyeOff, Trash2, Info, Shield } from 'lucide-react';
+import { Save, Key, Globe, Eye, EyeOff, Trash2, Info, Shield, RefreshCw } from 'lucide-react';
 import { useI18n } from '@/lib/i18n';
-import { AI_PROVIDERS, getProviderApiKeyLink, ProviderKey } from '@/config/ai-providers';
+import { AI_PROVIDERS, getProviderApiKeyLink, ProviderKey, AIModel } from '@/config/ai-providers';
 import { aiService } from '@/lib/ai-service';
 import { UpdateNotification } from '@/components/UpdateNotification';
 
@@ -33,13 +33,59 @@ export default function OptionsPage() {
   const [testing, setTesting] = useState(false);
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
   const [statusType, setStatusType] = useState<'success' | 'error'>('success');
+  const [ollamaModels, setOllamaModels] = useState<AIModel[]>([]);
+  const [fetchingModels, setFetchingModels] = useState(false);
+  const [ollamaFetchError, setOllamaFetchError] = useState<string | null>(null);
   const { t } = useI18n(settings.language);
 
-  const models = AI_PROVIDERS[settings.provider].models;
+  const models =
+    settings.provider === 'ollama'
+      ? ollamaModels
+      : AI_PROVIDERS[settings.provider].models;
+
+  const fetchOllamaModels = async (endpointUrl?: string) => {
+    setFetchingModels(true);
+    setOllamaFetchError(null);
+    try {
+      const raw =
+        endpointUrl ||
+        AI_PROVIDERS.ollama.endpoint ||
+        'http://localhost:11434/v1/chat/completions';
+      const origin = new URL(raw).origin;
+      const res = await fetch(`${origin}/api/tags`);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      const list: AIModel[] = Array.isArray(data?.models)
+        ? data.models.map((m: any) => ({ id: m.name, name: m.name }))
+        : [];
+      setOllamaModels(list);
+      setSettings((prev) => {
+        if (prev.provider !== 'ollama') return prev;
+        const hasCurrent = list.some((m) => m.id === prev.model);
+        if (!hasCurrent && list.length > 0) {
+          return { ...prev, model: list[0].id };
+        }
+        return prev;
+      });
+    } catch (err: any) {
+      console.error('Failed to fetch Ollama models:', err);
+      setOllamaModels([]);
+      setOllamaFetchError(err?.message || 'fetch failed');
+    } finally {
+      setFetchingModels(false);
+    }
+  };
 
   useEffect(() => {
     loadSettings();
   }, []);
+
+  useEffect(() => {
+    if (settings.provider === 'ollama') {
+      fetchOllamaModels(settings.endpoint);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [settings.provider]);
 
   useEffect(() => {
     setStatusMessage(null);
@@ -194,8 +240,9 @@ export default function OptionsPage() {
   };
 
   // Show/hide endpoint fields based on provider
-  const showEndpoint = ['openai', 'anthropic', 'google', 'openrouter', 'custom'].includes(settings.provider);
+  const showEndpoint = ['openai', 'anthropic', 'google', 'openrouter', 'ollama', 'custom'].includes(settings.provider);
   const showAzure = settings.provider === 'azure';
+  const isOllama = settings.provider === 'ollama';
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -246,54 +293,86 @@ export default function OptionsPage() {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">{t('modelLabel')}</label>
-                <select
-                  value={settings.model}
-                  onChange={(e) => setSettings({ ...settings, model: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent text-gray-900"
-                >
-                  {models.map((model) => (
-                    <option key={model.id} value={model.id}>
-                      {model.name}
-                    </option>
-                  ))}
-                </select>
+                <div className="flex items-center gap-2">
+                  <select
+                    value={settings.model}
+                    onChange={(e) => setSettings({ ...settings, model: e.target.value })}
+                    disabled={isOllama && fetchingModels}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent text-gray-900 disabled:bg-gray-100"
+                  >
+                    {isOllama && fetchingModels && (
+                      <option value="">{t('ollamaFetchingModels')}</option>
+                    )}
+                    {isOllama && !fetchingModels && models.length === 0 && (
+                      <option value="">
+                        {ollamaFetchError ? t('ollamaFetchFailed') : t('ollamaNoModels')}
+                      </option>
+                    )}
+                    {models.map((model) => (
+                      <option key={model.id} value={model.id}>
+                        {model.name}
+                      </option>
+                    ))}
+                  </select>
+                  {isOllama && (
+                    <button
+                      type="button"
+                      onClick={() => fetchOllamaModels(settings.endpoint)}
+                      disabled={fetchingModels}
+                      className="p-2 rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-100 disabled:opacity-50"
+                      title={t('ollamaRefreshModels')}
+                    >
+                      <RefreshCw size={18} className={fetchingModels ? 'animate-spin' : ''} />
+                    </button>
+                  )}
+                </div>
                 <p className="mt-2 text-sm text-gray-500">{t('modelHelp')}</p>
               </div>
             </div>
 
             <div className="grid md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">{t('apiKeyLabel')}</label>
-                <div className="flex items-center gap-2">
-                  <input
-                    type={showApiKey ? 'text' : 'password'}
-                    value={settings.apiKey}
-                    onChange={(e) => setSettings({ ...settings, apiKey: e.target.value })}
-                    placeholder={AI_PROVIDERS[settings.provider].apiKeyPrefix || t('apiKeyPlaceholder')}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent text-gray-900"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowApiKey((s) => !s)}
-                    className="p-2 rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-100"
-                    title={showApiKey ? 'Hide API Key' : 'Show API Key'}
-                  >
-                    {showApiKey ? <EyeOff size={18} /> : <Eye size={18} />}
-                  </button>
+              {!isOllama && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">{t('apiKeyLabel')}</label>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type={showApiKey ? 'text' : 'password'}
+                      value={settings.apiKey}
+                      onChange={(e) => setSettings({ ...settings, apiKey: e.target.value })}
+                      placeholder={AI_PROVIDERS[settings.provider].apiKeyPrefix || t('apiKeyPlaceholder')}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent text-gray-900"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowApiKey((s) => !s)}
+                      className="p-2 rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-100"
+                      title={showApiKey ? 'Hide API Key' : 'Show API Key'}
+                    >
+                      {showApiKey ? <EyeOff size={18} /> : <Eye size={18} />}
+                    </button>
+                  </div>
+                  <p className="mt-2 text-sm text-gray-500">
+                    {t('apiKeyHelp')}
+                  </p>
+                  <p className="mt-1 text-sm text-gray-500">
+                    <a 
+                      href={getProviderApiKeyLink(settings.provider)} 
+                      target="_blank" 
+                      className="text-blue-600 hover:text-blue-700"
+                    >
+                      {t('getApiKey')}
+                    </a>
+                  </p>
                 </div>
-                <p className="mt-2 text-sm text-gray-500">
-                  {t('apiKeyHelp')}
-                </p>
-                <p className="mt-1 text-sm text-gray-500">
-                  <a 
-                    href={getProviderApiKeyLink(settings.provider)} 
-                    target="_blank" 
-                    className="text-blue-600 hover:text-blue-700"
-                  >
-                    {t('getApiKey')}
-                  </a>
-                </p>
-              </div>
+              )}
+              {isOllama && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">{t('apiKeyLabel')}</label>
+                  <div className="px-4 py-2 border border-gray-200 rounded-lg bg-gray-50 text-sm text-gray-600">
+                    {t('ollamaNoApiKey')}
+                  </div>
+                </div>
+              )}
 
               {showEndpoint && (
                 <div>
@@ -302,6 +381,9 @@ export default function OptionsPage() {
                     type="text"
                     value={settings.endpoint}
                     onChange={(e) => setSettings({ ...settings, endpoint: e.target.value })}
+                    onBlur={() => {
+                      if (isOllama) fetchOllamaModels(settings.endpoint);
+                    }}
                     placeholder={AI_PROVIDERS[settings.provider].endpoint || t('endpointPlaceholder')}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent text-gray-900"
                   />
@@ -378,7 +460,7 @@ export default function OptionsPage() {
 
               <button
                 onClick={handleTest}
-                disabled={testing || saving || !settings.apiKey}
+                disabled={testing || saving || (!settings.apiKey && !isOllama)}
                 className="flex items-center gap-2 px-4 py-3 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed transition-colors font-medium"
               >
                 {testing ? (

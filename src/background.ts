@@ -23,12 +23,15 @@ chrome.runtime.onInstalled.addListener((details) => {
     const previousVersion = details.previousVersion;
     console.log('[Background] Extension updated from', previousVersion, 'to', currentVersion);
     
-    // Store update info for showing changelog
+    // Store update info for showing changelog and clear the pending-update flags
+    // since the update has now been applied.
     chrome.storage.local.set({
       lastVersion: previousVersion,
       currentVersion: currentVersion,
       showUpdateNotification: true,
-      updateTime: Date.now()
+      updateTime: Date.now(),
+      updateAvailable: false,
+      availableVersion: null
     });
     
     // Show notification about the update
@@ -241,12 +244,24 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   // Get update status
   if (request.action === 'getUpdateStatus') {
     chrome.storage.local.get(['updateAvailable', 'availableVersion', 'showUpdateNotification', 'lastVersion', 'currentVersion'], (result) => {
+      const currentVersion = chrome.runtime.getManifest().version;
+      // If the available version matches the current version, the update has
+      // already been applied — don't keep showing the "update available" banner.
+      const stillAvailable =
+        !!result.updateAvailable &&
+        !!result.availableVersion &&
+        result.availableVersion !== currentVersion;
+
+      if (!stillAvailable && result.updateAvailable) {
+        chrome.storage.local.set({ updateAvailable: false, availableVersion: null });
+      }
+
       sendResponse({
-        updateAvailable: result.updateAvailable || false,
-        availableVersion: result.availableVersion,
+        updateAvailable: stillAvailable,
+        availableVersion: stillAvailable ? result.availableVersion : undefined,
         showUpdateNotification: result.showUpdateNotification || false,
         lastVersion: result.lastVersion,
-        currentVersion: chrome.runtime.getManifest().version
+        currentVersion
       });
     });
     return true;
@@ -254,7 +269,14 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
   // Apply update (reload extension)
   if (request.action === 'applyUpdate') {
-    chrome.runtime.reload();
+    // Clear pending-update flags before reloading; after reload, onInstalled
+    // (reason=update) will set showUpdateNotification.
+    chrome.storage.local.set(
+      { updateAvailable: false, availableVersion: null },
+      () => {
+        chrome.runtime.reload();
+      }
+    );
     sendResponse({ success: true });
     return true;
   }

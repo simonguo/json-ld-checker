@@ -49,7 +49,7 @@ export class AIService {
         azureDeployment: result.azure_deployment || '',
       };
 
-      return !!this.config.apiKey;
+      return this.isConfigured();
     } catch (error) {
       console.error('Failed to load AI settings:', error);
       return false;
@@ -57,6 +57,7 @@ export class AIService {
   }
 
   isConfigured(): boolean {
+    if (this.config.provider === 'ollama') return true;
     return !!this.config.apiKey;
   }
 
@@ -131,6 +132,8 @@ export class AIService {
       headers['anthropic-version'] = '2023-06-01';
     } else if (this.config.provider === 'google') {
       // Google uses API key in URL
+    } else if (this.config.provider === 'ollama') {
+      // Ollama does not require authentication
     } else {
       headers['Authorization'] = `Bearer ${this.config.apiKey}`;
     }
@@ -189,7 +192,7 @@ export class AIService {
   }
 
   async callAI(messages: ChatMessage[], temperature = 0.7): Promise<string> {
-    if (!this.config.apiKey) {
+    if (!this.config.apiKey && this.config.provider !== 'ollama') {
       const errorMsg = isEnglish()
         ? 'API Key not configured. Please configure it in settings.'
         : 'API Key 未配置，请先在设置中配置';
