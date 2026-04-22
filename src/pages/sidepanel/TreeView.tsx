@@ -73,6 +73,12 @@ export const TreeView: React.FC<TreeViewProps> = ({ data }) => {
       setEditValidation(null);
     }
   }, [lang]);
+
+  const resetEditState = useCallback(() => {
+    setEditText(JSON.stringify(data, null, 2));
+    setEditParseError(null);
+    setEditValidation(null);
+  }, [data]);
   
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value);
@@ -84,7 +90,10 @@ export const TreeView: React.FC<TreeViewProps> = ({ data }) => {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = 'json-ld.json';
+    const schemaType = data?.['@type']
+      ? (Array.isArray(data['@type']) ? data['@type'][0] : data['@type'])
+      : 'json-ld';
+    a.download = `${schemaType}-${Date.now()}.json`;
     a.click();
     URL.revokeObjectURL(url);
   };
@@ -136,9 +145,7 @@ export const TreeView: React.FC<TreeViewProps> = ({ data }) => {
           <button
             onClick={() => {
               setViewMode('raw');
-              setEditText(JSON.stringify(data, null, 2));
-              setEditParseError(null);
-              setEditValidation(null);
+              resetEditState();
             }}
             className={`flex items-center gap-1.5 px-3 py-1.5 text-sm rounded-lg transition-all ${
               viewMode === 'raw'

@@ -109,9 +109,10 @@ export default function SidePanelPage() {
           setSelectedIndex(0);
           // Save to history
           try {
-            const allErrors = response.data.reduce((sum: number, item: any) => sum + validator.validate(item).errors.length, 0);
-            const allWarnings = response.data.reduce((sum: number, item: any) => sum + validator.validate(item).warnings.length, 0);
-            const allSuggestions = response.data.reduce((sum: number, item: any) => sum + validator.validate(item).suggestions.length, 0);
+            const validationResults = response.data.map((item: any) => validator.validate(item));
+            const allErrors = validationResults.reduce((sum: number, r: any) => sum + r.errors.length, 0);
+            const allWarnings = validationResults.reduce((sum: number, r: any) => sum + r.warnings.length, 0);
+            const allSuggestions = validationResults.reduce((sum: number, r: any) => sum + r.suggestions.length, 0);
             const types = response.data.flatMap((item: any) => {
               const t = item['@type'];
               return t ? (Array.isArray(t) ? t : [t]) : [];

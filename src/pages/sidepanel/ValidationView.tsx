@@ -70,7 +70,7 @@ export const ValidationView: React.FC<ValidationViewProps> = ({ data }) => {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = 'validation-results.json';
+    a.download = `validation-${schemaType || 'results'}-${Date.now()}.json`;
     a.click();
     URL.revokeObjectURL(url);
   };
