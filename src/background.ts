@@ -205,6 +205,8 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         title: chrome.i18n.getMessage('iconTitleNotFound')
       });
     }
+    sendResponse({ success: true });
+    return;
   }
   
   if (request.action === 'getJsonLdData') {
@@ -312,10 +314,8 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.action === 'dismissUpdateNotification') {
     chrome.storage.local.set({ showUpdateNotification: false });
     sendResponse({ success: true });
-    return true;
+    return;
   }
-  
-  return true;
 });
 
 // Clean up data when tab is closed
