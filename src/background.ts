@@ -141,77 +141,74 @@ const ICON_INACTIVE = {
 // Store JSON-LD data for each tab
 const tabData = new Map();
 
-// Listen for messages from content script
-chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-  console.log('[Background] Received message:', request.action, request);
-  
-  if (request.action === 'jsonLdDetected') {
-    // Check if sender.tab exists (message is from a content script in a tab)
-    if (!sender.tab || !sender.tab.id) {
-      console.warn('[Background] jsonLdDetected message received but sender.tab is undefined');
-      return true;
-    }
-    
-    const tabId = sender.tab.id;
-    console.log('[Background] Tab ID:', tabId, 'JSON-LD found:', request.data.found, 'Count:', request.data.count);
-    tabData.set(tabId, request.data);
-    
-    // Update icon based on whether JSON-LD was found, and whether it has errors
-    if (request.data.found) {
-      // Run validation to determine if there are errors
-      let hasErrors = false;
-      let totalErrors = 0;
-      if (request.data.data && Array.isArray(request.data.data)) {
-        for (const item of request.data.data) {
-          const results = validator.validate(item);
-          if (results.errors.length > 0) {
-            hasErrors = true;
-            totalErrors += results.errors.length;
-          }
+// Update extension icon and badge for a tab based on scan result
+function updateTabIcon(tabId: number, data: { found: boolean; count: number; data: any[] }) {
+  if (data.found) {
+    let hasErrors = false;
+    if (data.data && Array.isArray(data.data)) {
+      for (const item of data.data) {
+        const results = validator.validate(item);
+        if (results.errors.length > 0) {
+          hasErrors = true;
+          break;
         }
       }
-
-      console.log('[Background] Setting active icon for tab', tabId, 'hasErrors:', hasErrors);
-      chrome.action.setIcon({ tabId, path: ICON_ACTIVE }).then(() => {
-        console.log('[Background] Active icon set successfully');
-      }).catch((error) => {
-        console.error('[Background] Error setting active icon:', error);
-      });
-
-      if (hasErrors) {
-        // Red badge showing error count
-        chrome.action.setBadgeText({ tabId, text: '!' });
-        chrome.action.setBadgeBackgroundColor({ tabId, color: '#ef4444' });
-      } else {
-        // Green badge showing JSON-LD count
-        chrome.action.setBadgeText({ tabId, text: request.data.count.toString() });
-        chrome.action.setBadgeBackgroundColor({ tabId, color: '#22c55e' });
-      }
-
-      chrome.action.setTitle({ 
-        tabId, 
-        title: chrome.i18n.getMessage('iconTitleFound', [request.data.count.toString()])
-      });
-    } else {
-      console.log('[Background] Setting inactive icon for tab', tabId);
-      chrome.action.setIcon({ tabId, path: ICON_INACTIVE }).then(() => {
-        console.log('[Background] Inactive icon set successfully');
-      }).catch((error) => {
-        console.error('[Background] Error setting inactive icon:', error);
-      });
-      chrome.action.setBadgeText({ tabId, text: '' });
-      chrome.action.setTitle({ 
-        tabId, 
-        title: chrome.i18n.getMessage('iconTitleNotFound')
-      });
     }
-    sendResponse({ success: true });
-    return;
+    chrome.action.setIcon({ tabId, path: ICON_ACTIVE }).catch(() => {});
+    if (hasErrors) {
+      chrome.action.setBadgeText({ tabId, text: '!' });
+      chrome.action.setBadgeBackgroundColor({ tabId, color: '#ef4444' });
+    } else {
+      chrome.action.setBadgeText({ tabId, text: data.count.toString() });
+      chrome.action.setBadgeBackgroundColor({ tabId, color: '#22c55e' });
+    }
+    chrome.action.setTitle({ tabId, title: chrome.i18n.getMessage('iconTitleFound', [data.count.toString()]) });
+  } else {
+    chrome.action.setIcon({ tabId, path: ICON_INACTIVE }).catch(() => {});
+    chrome.action.setBadgeText({ tabId, text: '' });
+    chrome.action.setTitle({ tabId, title: chrome.i18n.getMessage('iconTitleNotFound') });
   }
-  
+}
+
+// Clear cached data when a tab navigates to a new page
+chrome.tabs.onUpdated.addListener((tabId, changeInfo) => {
+  if (changeInfo.status === 'loading') {
+    tabData.delete(tabId);
+  }
+});
+
+// Listen for messages
+chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.action === 'getJsonLdData') {
     const tabId = request.tabId;
-    sendResponse(tabData.get(tabId) || null);
+
+    // Return cached result immediately if available
+    if (tabData.has(tabId)) {
+      sendResponse(tabData.get(tabId));
+      return;
+    }
+
+    // Otherwise scan the tab on demand
+    chrome.scripting.executeScript({
+      target: { tabId },
+      func: () => {
+        const elements = document.querySelectorAll('script[type="application/ld+json"]');
+        const data: any[] = [];
+        elements.forEach((el: Element) => {
+          try { data.push(JSON.parse(el.textContent || '')); } catch (_) {}
+        });
+        return { found: data.length > 0, count: data.length, data };
+      }
+    }).then((results) => {
+      const result = results?.[0]?.result ?? null;
+      if (result) {
+        tabData.set(tabId, result);
+        updateTabIcon(tabId, result);
+      }
+      sendResponse(result);
+    }).catch(() => sendResponse(null));
+
+    return true;
   }
   
   if (request.action === 'getPageInfo') {
