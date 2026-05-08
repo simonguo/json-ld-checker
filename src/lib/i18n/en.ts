@@ -28,6 +28,8 @@ export default {
   // Tree View
   selectJsonLd: 'Select JSON-LD ({count} total)',
   unknownType: 'Unknown Type',
+  sortKeys: 'Alphabetical',
+  sourceOrder: 'Source Order',
   searchPlaceholder: 'Search in tree...',
   clearSearch: 'Clear search',
   searchResults: '{count} results found',

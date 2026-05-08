@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "JSON-LD Checker",
-  "version": "2.3.0",
+  "version": "2.3.2",
   "description": "Check and validate JSON-LD structured data on webpages",
   "permissions": [
     "activeTab",

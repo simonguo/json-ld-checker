@@ -28,6 +28,8 @@ export default {
   // Tree View
   selectJsonLd: '选择 JSON-LD（共 {count} 个）',
   unknownType: '未知类型',
+  sortKeys: '字母排序',
+  sourceOrder: '原始顺序',
   searchPlaceholder: '在树中搜索...',
   clearSearch: '清除搜索',
   searchResults: '找到 {count} 个结果',

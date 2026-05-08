@@ -1,6 +1,6 @@
 import React, { useState, useCallback } from 'react';
 import { JSONTree } from 'react-json-tree';
-import { Search, X, Code2, TreePine, Copy, Check, Edit3, Download } from 'lucide-react';
+import { Search, X, Code2, TreePine, Copy, Check, Edit3, Download, ArrowUpDown } from 'lucide-react';
 import { useI18n } from '@/lib/i18n';
 import { validator } from '@/lib/validator';
 
@@ -34,6 +34,7 @@ export const TreeView: React.FC<TreeViewProps> = ({ data }) => {
   const { t, lang } = useI18n();
   const [searchTerm, setSearchTerm] = useState('');
   const [viewMode, setViewMode] = useState<'tree' | 'raw'>('tree');
+  const [sortKeys, setSortKeys] = useState(false);
   const [copied, setCopied] = useState(false);
   const [editText, setEditText] = useState<string>(() => JSON.stringify(data, null, 2));
   const [editParseError, setEditParseError] = useState<string | null>(null);
@@ -156,7 +157,7 @@ export const TreeView: React.FC<TreeViewProps> = ({ data }) => {
             <Code2 className="w-4 h-4" />
             {t('rawData')}
           </button>
-          
+
           {viewMode === 'raw' && (
             <button
               onClick={handleEditCopy}
@@ -215,11 +216,24 @@ export const TreeView: React.FC<TreeViewProps> = ({ data }) => {
       {/* Content */}
       <div className="max-h-[calc(100vh-320px)] overflow-auto">
         {viewMode === 'tree' ? (
-          <div className="font-mono text-xs p-3 bg-white">
-            <JSONTree 
+          <div className="font-mono text-xs p-3 bg-white relative">
+            <button
+              onClick={() => setSortKeys(!sortKeys)}
+              className={`absolute top-2 right-2 z-10 flex items-center gap-1.5 px-2 py-1 text-xs rounded-md transition-all ${
+                sortKeys
+                  ? 'bg-primary-500 text-white shadow-sm'
+                  : 'bg-gray-100 text-gray-500 hover:bg-gray-200 hover:text-gray-700'
+              }`}
+              title={sortKeys ? t('sourceOrder') : t('sortKeys')}
+            >
+              <ArrowUpDown className="w-3.5 h-3.5" />
+              {sortKeys ? t('sortKeys') : t('sourceOrder')}
+            </button>
+            <JSONTree
               data={data}
               theme={theme}
               invertTheme={false}
+              sortObjectKeys={sortKeys}
               shouldExpandNodeInitially={shouldExpandNode}
               hideRoot={false}
               getItemString={(type, data, itemType, itemString) => {

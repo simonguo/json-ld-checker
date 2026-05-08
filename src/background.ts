@@ -194,10 +194,15 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       func: () => {
         const elements = document.querySelectorAll('script[type="application/ld+json"]');
         const data: any[] = [];
+        const rawTexts: string[] = [];
         elements.forEach((el: Element) => {
-          try { data.push(JSON.parse(el.textContent || '')); } catch (_) {}
+          const raw = el.textContent || '';
+          try {
+            data.push(JSON.parse(raw));
+            rawTexts.push(raw);
+          } catch (_) {}
         });
-        return { found: data.length > 0, count: data.length, data };
+        return { found: data.length > 0, count: data.length, data, rawTexts };
       }
     }).then((results) => {
       const result = results?.[0]?.result ?? null;
@@ -223,12 +228,14 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
             title: document.title,
             description: document.querySelector('meta[name="description"]')?.getAttribute('content') || '',
             existingJsonLd: Array.from(document.querySelectorAll('script[type="application/ld+json"]')).map(el => {
+              const raw = el.textContent || '';
               try {
-                return JSON.parse(el.textContent || '');
+                return JSON.parse(raw);
               } catch (e) {
                 return null;
               }
-            }).filter(data => data !== null)
+            }).filter(data => data !== null),
+            rawTexts: Array.from(document.querySelectorAll('script[type="application/ld+json"]')).map(el => el.textContent || ''),
           };
         }
       }).then((results) => {

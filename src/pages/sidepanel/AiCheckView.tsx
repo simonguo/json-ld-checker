@@ -6,14 +6,25 @@ import { MarkdownRenderer } from '@/components/MarkdownRenderer';
 
 interface AiCheckViewProps {
   data: any;
+  cacheKey: string;
 }
 
-export const AiCheckView: React.FC<AiCheckViewProps> = ({ data }) => {
+export const AiCheckView: React.FC<AiCheckViewProps> = ({ data, cacheKey }) => {
   const { t } = useI18n();
   const [result, setResult] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isConfigured, setIsConfigured] = useState(aiService.isConfigured());
+
+  // Restore cached result whenever the target schema changes
+  React.useEffect(() => {
+    setResult(null);
+    if (!cacheKey) return;
+    chrome.storage.session.get([`aiCheck_${cacheKey}`], (stored) => {
+      const cached = stored[`aiCheck_${cacheKey}`];
+      if (cached) setResult(cached);
+    });
+  }, [cacheKey]);
 
   // Listen for AI config changes
   React.useEffect(() => {
@@ -49,8 +60,11 @@ export const AiCheckView: React.FC<AiCheckViewProps> = ({ data }) => {
       setLoading(true);
       setError(null);
       const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-      const result = await aiService.checkJsonLd(data, tab.url || '');
-      setResult(result);
+      const aiResult = await aiService.checkJsonLd(data, tab.url || '');
+      setResult(aiResult);
+      if (cacheKey) {
+        chrome.storage.session.set({ [`aiCheck_${cacheKey}`]: aiResult });
+      }
     } catch (err: any) {
       setError(err.message || t('aiCheckFailed'));
     } finally {

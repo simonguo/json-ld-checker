@@ -26,6 +26,7 @@ export default function SidePanelPage() {
   const [currentTab, setCurrentTab] = useState('data');
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [refreshing, setRefreshing] = useState(false);
+  const [currentTabUrl, setCurrentTabUrl] = useState('');
 
   useEffect(() => {
     loadJsonLdData();
@@ -96,6 +97,7 @@ export default function SidePanelPage() {
       if (!tab.id) {
         throw new Error(t('unableToGetCurrentTab'));
       }
+      setCurrentTabUrl(tab.url || '');
 
       // Request JSON-LD data from background script
       const response = await chrome.runtime.sendMessage({
@@ -104,16 +106,28 @@ export default function SidePanelPage() {
       });
 
       if (response) {
-        setJsonData(response);
-        if (response.data && response.data.length > 0) {
+        // Re-parse from raw JSON text to preserve source key order,
+        // since Chrome's structured clone may reorder object properties.
+        let jsonLdData;
+        if (response.rawTexts && response.rawTexts.length > 0) {
+          jsonLdData = response.rawTexts
+            .map((raw: string) => {
+              try { return JSON.parse(raw); } catch (_) { return null; }
+            })
+            .filter(Boolean);
+        } else {
+          jsonLdData = response.data;
+        }
+        setJsonData({ found: response.found, count: response.count, data: jsonLdData });
+        if (jsonLdData.length > 0) {
           setSelectedIndex(0);
           // Save to history
           try {
-            const validationResults = response.data.map((item: any) => validator.validate(item));
+            const validationResults = jsonLdData.map((item: any) => validator.validate(item));
             const allErrors = validationResults.reduce((sum: number, r: any) => sum + r.errors.length, 0);
             const allWarnings = validationResults.reduce((sum: number, r: any) => sum + r.warnings.length, 0);
             const allSuggestions = validationResults.reduce((sum: number, r: any) => sum + r.suggestions.length, 0);
-            const types = response.data.flatMap((item: any) => {
+            const types = jsonLdData.flatMap((item: any) => {
               const t = item['@type'];
               return t ? (Array.isArray(t) ? t : [t]) : [];
             });
@@ -350,7 +364,7 @@ export default function SidePanelPage() {
         <div className="p-4">
           {currentTab === 'data' && <TreeView data={selectedData} />}
           {currentTab === 'validation' && <ValidationView data={selectedData} />}
-          {currentTab === 'aiCheck' && <AiCheckView data={selectedData} />}
+          {currentTab === 'aiCheck' && <AiCheckView data={selectedData} cacheKey={`${currentTabUrl}-${selectedIndex}`} />}
           {currentTab === 'aiSuggest' && <AiSuggestView />}
           {currentTab === 'history' && <HistoryView />}
         </div>
