@@ -5,24 +5,26 @@ JSON-LD Checker is a Chromium extension that inspects, validates, and visualizes
 ## Highlights
 
 - Auto-detects JSON-LD on any page and surfaces status in the toolbar icon.
-- Side panel views for a collapsible tree, raw JSON, validation summary, and AI-powered insights.
+- Developer-focused side panel with Inspector, Issues, History, and secondary AI tools.
 - Built-in validator covering missing fields, wrong data types, malformed URLs, and SEO recommendations.
-- AI Check explains issues in existing markup; AI Suggest drafts production-ready JSON-LD even when none exists.
+- Validation issues include JSONPath locations that jump back to the relevant tree node.
+- AI Review explains existing markup; Generate Draft proposes JSON-LD even when none exists.
 - Internationalized UI with automatic language detection and manual language switcher (System / English / 中文).
 
 ## Install
 
 1. Clone or download this repository.
-2. Open `chrome://extensions` (or `edge://extensions`) and enable **Developer mode**.
-3. Choose **Load unpacked** and select the project directory.
+2. Run `npm install` and `npm run build`.
+3. Open `chrome://extensions` (or `edge://extensions`) and enable **Developer mode**.
+4. Choose **Load unpacked** and select the generated `dist/` directory.
 
 Optional: run `node create-icons.js` (requires `npm install canvas`) to regenerate icons.
 
 ## Getting Started
 
 1. Browse to any page and open the side panel from the extension icon.
-2. Switch between tabs to inspect tree, raw JSON, validation, AI Check, or AI Suggest.
-3. Use the dropdown when multiple JSON-LD blocks are detected.
+2. Use Inspector for the tree or local source draft, and Issues for validation results.
+3. Use the schema selector when multiple JSON-LD blocks are detected; open AI from the compact toolbar when needed.
 
 ### Configure AI
 
@@ -32,9 +34,9 @@ Optional: run `node create-icons.js` (requires `npm install canvas`) to regenera
 
 ## Development Notes
 
-- Manifest V3 + vanilla JavaScript; no build step required.
-- Source overview: background worker, content script, side panel UI, validator, AI service, and settings page.
-- After editing files, refresh the extension from `chrome://extensions`.
+- Manifest V3 + React + TypeScript, built with Vite and CRXJS.
+- Run `npm run type-check`, `npm test`, and `npm run build` before loading `dist/` as an unpacked extension.
+- Local JSON-LD QA pages live in `tests/fixtures/`.
 
 ## Contributing & License
 

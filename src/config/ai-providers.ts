@@ -3,9 +3,16 @@ export type ProviderKey =
   | 'anthropic'
   | 'google'
   | 'azure'
+  | 'deepseek'
+  | 'qwen'
+  | 'kimi'
+  | 'zhipu'
+  | 'minimax'
   | 'openrouter'
   | 'ollama'
   | 'custom';
+
+export type ProviderGroup = 'global' | 'china' | 'runtime';
 
 export interface AIModel {
   id: string;
@@ -14,6 +21,7 @@ export interface AIModel {
 
 export interface AIProvider {
   name: string;
+  group: ProviderGroup;
   models: AIModel[];
   apiKeyPrefix?: string;
   endpoint?: string;
@@ -22,95 +30,129 @@ export interface AIProvider {
 export const AI_PROVIDERS: Record<ProviderKey, AIProvider> = {
   openai: {
     name: 'OpenAI',
+    group: 'global',
     apiKeyPrefix: 'sk-',
     endpoint: 'https://api.openai.com/v1/chat/completions',
     models: [
-      { id: 'gpt-5.4', name: 'GPT-5.4' },
-      { id: 'gpt-5.4-mini', name: 'GPT-5.4 Mini' },
-      { id: 'gpt-5.4-nano', name: 'GPT-5.4 Nano' },
-      { id: 'gpt-4o', name: 'GPT-4o' },
-      { id: 'gpt-4o-mini', name: 'GPT-4o Mini' },
-      { id: 'gpt-4-turbo', name: 'GPT-4 Turbo' },
-      { id: 'gpt-4', name: 'GPT-4' },
-      { id: 'gpt-3.5-turbo', name: 'GPT-3.5 Turbo' },
+      { id: 'gpt-5.6-terra', name: 'GPT-5.6 Terra' },
+      { id: 'gpt-5.6-sol', name: 'GPT-5.6 Sol' },
+      { id: 'gpt-5.6-luna', name: 'GPT-5.6 Luna' },
     ],
   },
   anthropic: {
     name: 'Anthropic',
+    group: 'global',
     apiKeyPrefix: 'sk-ant-',
     endpoint: 'https://api.anthropic.com/v1/messages',
     models: [
-      { id: 'claude-opus-4-7', name: 'Claude Opus 4.7' },
-      { id: 'claude-sonnet-4-6', name: 'Claude Sonnet 4.6' },
+      { id: 'claude-sonnet-5', name: 'Claude Sonnet 5' },
+      { id: 'claude-opus-4-8', name: 'Claude Opus 4.8' },
+      { id: 'claude-fable-5', name: 'Claude Fable 5' },
       { id: 'claude-haiku-4-5', name: 'Claude Haiku 4.5' },
-      { id: 'claude-3-5-sonnet-20241022', name: 'Claude 3.5 Sonnet' },
-      { id: 'claude-3-5-haiku-20241022', name: 'Claude 3.5 Haiku' },
-      { id: 'claude-3-opus-20240229', name: 'Claude 3 Opus' },
     ],
   },
   google: {
     name: 'Google Gemini',
+    group: 'global',
     apiKeyPrefix: 'AIza',
     endpoint: 'https://generativelanguage.googleapis.com/v1beta/models',
     models: [
+      { id: 'gemini-3.6-flash', name: 'Gemini 3.6 Flash' },
       { id: 'gemini-3.1-pro-preview', name: 'Gemini 3.1 Pro (Preview)' },
-      { id: 'gemini-3-flash-preview', name: 'Gemini 3 Flash (Preview)' },
-      { id: 'gemini-3.1-flash-lite-preview', name: 'Gemini 3.1 Flash-Lite (Preview)' },
-      { id: 'gemini-2.5-pro', name: 'Gemini 2.5 Pro' },
-      { id: 'gemini-2.5-flash', name: 'Gemini 2.5 Flash' },
-      { id: 'gemini-2.5-flash-lite', name: 'Gemini 2.5 Flash-Lite' },
-      { id: 'gemini-1.5-pro', name: 'Gemini 1.5 Pro' },
-      { id: 'gemini-1.5-flash', name: 'Gemini 1.5 Flash' },
+      { id: 'gemini-3.5-flash-lite', name: 'Gemini 3.5 Flash-Lite' },
     ],
   },
   azure: {
     name: 'Azure OpenAI',
+    group: 'global',
     models: [
-      { id: 'gpt-5.4', name: 'GPT-5.4' },
-      { id: 'gpt-5.4-mini', name: 'GPT-5.4 Mini' },
-      { id: 'gpt-4o', name: 'GPT-4o' },
-      { id: 'gpt-4o-mini', name: 'GPT-4o Mini' },
-      { id: 'gpt-4-turbo', name: 'GPT-4 Turbo' },
-      { id: 'gpt-4', name: 'GPT-4' },
-      { id: 'gpt-35-turbo', name: 'GPT-3.5 Turbo' },
+      { id: 'gpt-5.6-terra', name: 'GPT-5.6 Terra' },
+      { id: 'gpt-5.6-sol', name: 'GPT-5.6 Sol' },
+      { id: 'gpt-5.6-luna', name: 'GPT-5.6 Luna' },
+    ],
+  },
+  deepseek: {
+    name: 'DeepSeek',
+    group: 'china',
+    apiKeyPrefix: 'sk-',
+    endpoint: 'https://api.deepseek.com/chat/completions',
+    models: [
+      { id: 'deepseek-v4-pro', name: 'DeepSeek V4 Pro' },
+      { id: 'deepseek-v4-flash', name: 'DeepSeek V4 Flash' },
+    ],
+  },
+  qwen: {
+    name: 'Alibaba Cloud Qwen (百炼)',
+    group: 'china',
+    apiKeyPrefix: 'sk-',
+    endpoint: 'https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions',
+    models: [
+      { id: 'qwen3.7-plus', name: 'Qwen 3.7 Plus' },
+      { id: 'qwen3.7-max', name: 'Qwen 3.7 Max' },
+      { id: 'qwen3.6-flash', name: 'Qwen 3.6 Flash' },
+    ],
+  },
+  kimi: {
+    name: 'Moonshot Kimi (月之暗面)',
+    group: 'china',
+    apiKeyPrefix: 'sk-',
+    endpoint: 'https://api.moonshot.cn/v1/chat/completions',
+    models: [
+      { id: 'kimi-k3', name: 'Kimi K3' },
+      { id: 'kimi-k2.7-code', name: 'Kimi K2.7 Code' },
+      { id: 'kimi-k2.6', name: 'Kimi K2.6' },
+    ],
+  },
+  zhipu: {
+    name: 'Zhipu GLM (智谱)',
+    group: 'china',
+    endpoint: 'https://open.bigmodel.cn/api/paas/v4/chat/completions',
+    models: [
+      { id: 'glm-5.2', name: 'GLM-5.2' },
+      { id: 'glm-5-turbo', name: 'GLM-5 Turbo' },
+      { id: 'glm-4.7-flashx', name: 'GLM-4.7 FlashX' },
+    ],
+  },
+  minimax: {
+    name: 'MiniMax',
+    group: 'china',
+    apiKeyPrefix: 'sk-',
+    endpoint: 'https://api.minimaxi.com/v1/chat/completions',
+    models: [
+      { id: 'MiniMax-M3', name: 'MiniMax M3' },
+      { id: 'MiniMax-M2.7-highspeed', name: 'MiniMax M2.7 Highspeed' },
     ],
   },
   openrouter: {
     name: 'OpenRouter',
+    group: 'global',
     apiKeyPrefix: 'sk-or-',
     endpoint: 'https://openrouter.ai/api/v1/chat/completions',
     models: [
-      { id: 'openai/gpt-5.4', name: 'GPT-5.4' },
-      { id: 'openai/gpt-5.4-mini', name: 'GPT-5.4 Mini' },
-      { id: 'openai/gpt-4o', name: 'GPT-4o' },
-      { id: 'openai/gpt-4o-mini', name: 'GPT-4o Mini' },
-      { id: 'anthropic/claude-opus-4.7', name: 'Claude Opus 4.7' },
-      { id: 'anthropic/claude-sonnet-4.6', name: 'Claude Sonnet 4.6' },
+      { id: 'openai/gpt-5.6-terra', name: 'GPT-5.6 Terra' },
+      { id: 'openai/gpt-5.6-sol', name: 'GPT-5.6 Sol' },
+      { id: 'openai/gpt-5.6-luna', name: 'GPT-5.6 Luna' },
+      { id: 'anthropic/claude-sonnet-5', name: 'Claude Sonnet 5' },
+      { id: 'anthropic/claude-opus-4.8', name: 'Claude Opus 4.8' },
+      { id: 'anthropic/claude-fable-5', name: 'Claude Fable 5' },
       { id: 'anthropic/claude-haiku-4.5', name: 'Claude Haiku 4.5' },
-      { id: 'anthropic/claude-3.5-sonnet', name: 'Claude 3.5 Sonnet' },
-      { id: 'google/gemini-2.5-pro', name: 'Gemini 2.5 Pro' },
-      { id: 'google/gemini-2.5-flash', name: 'Gemini 2.5 Flash' },
-      { id: 'moonshotai/kimi-k2.6', name: 'Kimi K2.6' },
-      { id: 'meta-llama/llama-3.3-70b-instruct', name: 'Llama 3.3 70B' },
+      { id: 'google/gemini-3.6-flash', name: 'Gemini 3.6 Flash' },
+      { id: 'google/gemini-3.1-pro-preview', name: 'Gemini 3.1 Pro (Preview)' },
+      { id: 'google/gemini-3.5-flash-lite', name: 'Gemini 3.5 Flash-Lite' },
+      { id: 'moonshotai/kimi-k3', name: 'Kimi K3' },
+      { id: 'meta/muse-spark-1.1', name: 'Meta Muse Spark 1.1' },
     ],
   },
   ollama: {
     name: 'Ollama (Local)',
+    group: 'runtime',
     endpoint: 'http://localhost:11434/v1/chat/completions',
     models: [],
   },
   custom: {
     name: 'Custom Endpoint',
-    models: [
-      { id: 'gpt-5.4', name: 'GPT-5.4' },
-      { id: 'gpt-5.4-mini', name: 'GPT-5.4 Mini' },
-      { id: 'gpt-4o', name: 'GPT-4o' },
-      { id: 'gpt-4o-mini', name: 'GPT-4o Mini' },
-      { id: 'claude-opus-4-7', name: 'Claude Opus 4.7' },
-      { id: 'claude-sonnet-4-6', name: 'Claude Sonnet 4.6' },
-      { id: 'gemini-2.5-pro', name: 'Gemini 2.5 Pro' },
-      { id: 'gemini-2.5-flash', name: 'Gemini 2.5 Flash' },
-    ],
+    group: 'runtime',
+    models: [],
   },
 };
 
@@ -120,6 +162,11 @@ export const getProviderApiKeyLink = (provider: ProviderKey): string => {
     anthropic: 'https://console.anthropic.com/settings/keys',
     google: 'https://aistudio.google.com/app/apikey',
     azure: 'https://portal.azure.com/',
+    deepseek: 'https://platform.deepseek.com/api_keys',
+    qwen: 'https://bailian.console.aliyun.com/',
+    kimi: 'https://platform.kimi.com/console/api-keys',
+    zhipu: 'https://open.bigmodel.cn/usercenter/apikeys',
+    minimax: 'https://platform.minimaxi.com/user-center/basic-information/interface-key',
     openrouter: 'https://openrouter.ai/keys',
     ollama: 'https://ollama.com/library',
     custom: '#',

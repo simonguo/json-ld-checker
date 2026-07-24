@@ -1,4 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
+import { CheckCircle2, Download, RefreshCw } from 'lucide-react';
+import { Badge, Button, Notice } from '@/components/ui';
 import { useI18n } from '@/lib/i18n';
 
 interface UpdateStatus {
@@ -9,153 +11,122 @@ interface UpdateStatus {
   currentVersion: string;
 }
 
-interface UpdateNotificationProps {
-  language?: string;
-}
-
-export const UpdateNotification: React.FC<UpdateNotificationProps> = ({ language = 'auto' }) => {
+export function UpdateNotification({ language = 'auto' }: { language?: string }) {
   const { t } = useI18n(language);
-  const [updateStatus, setUpdateStatus] = useState<UpdateStatus | null>(null);
+  const [status, setStatus] = useState<UpdateStatus | null>(null);
   const [checking, setChecking] = useState(false);
+  const [message, setMessage] = useState<string | null>(null);
 
   useEffect(() => {
-    checkUpdateStatus();
+    if (typeof chrome === 'undefined' || !chrome.runtime?.sendMessage) {
+      setStatus({
+        updateAvailable: false,
+        showUpdateNotification: false,
+        currentVersion: '2.3.2',
+      });
+      return;
+    }
+    chrome.runtime.sendMessage({ action: 'getUpdateStatus' }).then(setStatus);
   }, []);
 
-  const checkUpdateStatus = async () => {
-    const response = await chrome.runtime.sendMessage({ action: 'getUpdateStatus' });
-    setUpdateStatus(response);
-  };
-
-  const handleCheckForUpdates = async () => {
+  const checkForUpdates = async () => {
     setChecking(true);
+    setMessage(null);
     try {
       const response = await chrome.runtime.sendMessage({ action: 'checkForUpdates' });
-      console.log('Update check result:', response);
-      
       if (response.status === 'update_available') {
-        setUpdateStatus({
-          ...updateStatus!,
+        setStatus((current) => current ? {
+          ...current,
           updateAvailable: true,
-          availableVersion: response.version
-        });
+          availableVersion: response.version,
+        } : current);
       } else if (response.status === 'no_update') {
-        // Show a temporary message
-        alert(t('latestVersion'));
+        setMessage(t('latestVersion'));
       }
-    } catch (error) {
-      console.error('Error checking for updates:', error);
+    } catch {
+      setMessage(t('updateCheckFailed'));
     } finally {
       setChecking(false);
     }
   };
 
-  const handleApplyUpdate = async () => {
-    await chrome.runtime.sendMessage({ action: 'applyUpdate' });
-  };
-
-  const handleDismissNotification = async () => {
-    await chrome.runtime.sendMessage({ action: 'dismissUpdateNotification' });
-    setUpdateStatus({ ...updateStatus!, showUpdateNotification: false });
-  };
-
-  if (!updateStatus) {
-    return null;
+  if (!status) {
+    return <div className="h-9 w-full animate-pulse rounded-tool bg-gray-100" />;
   }
 
   return (
     <div className="space-y-3">
-      {/* Update Available Banner */}
-      {updateStatus.updateAvailable && (
-        <div className="bg-primary-50 border border-primary-100 rounded-lg p-4">
-          <div className="flex items-start gap-3">
-            <div className="flex-shrink-0">
-              <svg className="w-6 h-6 text-primary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-            </div>
-            <div className="flex-1">
-              <h4 className="text-sm font-semibold text-primary-700 mb-1">
-                🎉 {t('updateAvailable')}
-              </h4>
-              <p className="text-sm text-primary-600 mb-3">
-                {t('updateAvailableDesc', { version: updateStatus.availableVersion })}
-              </p>
-              <div className="flex gap-2">
-                <button
-                  onClick={handleApplyUpdate}
-                  className="px-4 py-2 bg-primary-500 text-white text-sm font-medium rounded-lg hover:bg-primary-600 transition-colors"
-                >
-                  {t('updateNow')}
-                </button>
-                <button
-                  onClick={() => setUpdateStatus({ ...updateStatus, updateAvailable: false })}
-                  className="px-4 py-2 bg-white text-primary-500 text-sm font-medium rounded-lg border border-primary-500 hover:bg-primary-50 transition-colors"
-                >
-                  {t('updateLater')}
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Just Updated Notification */}
-      {updateStatus.showUpdateNotification && updateStatus.lastVersion && (
-        <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-          <div className="flex items-start gap-3">
-            <div className="flex-shrink-0">
-              <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-            </div>
-            <div className="flex-1">
-              <h4 className="text-sm font-semibold text-green-900 mb-1">
-                ✨ {t('updateSuccess')}
-              </h4>
-              <p className="text-sm text-green-700 mb-2">
-                {t('updateSuccessDesc', { from: updateStatus.lastVersion, to: updateStatus.currentVersion })}
-              </p>
-              <button
-                onClick={handleDismissNotification}
-                className="text-sm text-green-600 hover:text-green-700 font-medium"
+      {status.updateAvailable && (
+        <Notice
+          tone="accent"
+          title={t('updateAvailable')}
+          actions={
+            <>
+              <Button
+                size="sm"
+                variant="primary"
+                icon={<Download size={14} />}
+                onClick={() => chrome.runtime.sendMessage({ action: 'applyUpdate' })}
               >
-                {t('dismiss')}
-              </button>
-            </div>
-          </div>
-        </div>
+                {t('updateNow')}
+              </Button>
+              <Button
+                size="sm"
+                variant="secondary"
+                onClick={() => setStatus((current) => current ? { ...current, updateAvailable: false } : current)}
+              >
+                {t('updateLater')}
+              </Button>
+            </>
+          }
+        >
+          {t('updateAvailableDesc', { version: status.availableVersion || '' })}
+        </Notice>
       )}
 
-      {/* Manual Check Button */}
-      <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-        <div className="flex items-center gap-2">
-          <span className="text-sm text-gray-600">{t('currentVersion')}:</span>
-          <span className="text-sm font-semibold text-gray-900">v{updateStatus.currentVersion}</span>
-        </div>
-        <button
-          onClick={handleCheckForUpdates}
-          disabled={checking}
-          className="px-4 py-2 bg-primary-500 text-white text-sm font-medium rounded-lg hover:bg-primary-600 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
+      {status.showUpdateNotification && status.lastVersion && (
+        <Notice
+          tone="success"
+          title={t('updateSuccess')}
+          actions={
+            <Button
+              size="sm"
+              variant="secondary"
+              onClick={async () => {
+                await chrome.runtime.sendMessage({ action: 'dismissUpdateNotification' });
+                setStatus((current) => current ? { ...current, showUpdateNotification: false } : current);
+              }}
+            >
+              {t('dismiss')}
+            </Button>
+          }
         >
-          {checking ? (
-            <>
-              <svg className="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-              </svg>
-              {t('checking')}
-            </>
-          ) : (
-            <>
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-              </svg>
-              {t('checkForUpdates')}
-            </>
-          )}
-        </button>
+          {t('updateSuccessDesc', { from: status.lastVersion, to: status.currentVersion })}
+        </Notice>
+      )}
+
+      <div className="flex flex-wrap items-center gap-3 rounded-tool border border-border bg-gray-50 px-3 py-2.5">
+        <div className="min-w-0 flex-1">
+          <span className="text-xs text-muted">{t('currentVersion')}</span>
+          <Badge className="ml-2">v{status.currentVersion}</Badge>
+        </div>
+        <Button
+          size="sm"
+          variant="secondary"
+          icon={<RefreshCw size={14} className={checking ? 'animate-spin' : ''} />}
+          onClick={checkForUpdates}
+          disabled={checking}
+        >
+          {checking ? t('checking') : t('checkForUpdates')}
+        </Button>
       </div>
+
+      {message && (
+        <p className="flex items-center gap-1.5 text-xs text-muted" role="status">
+          <CheckCircle2 size={14} className="text-success-500" />
+          {message}
+        </p>
+      )}
     </div>
   );
-};
+}

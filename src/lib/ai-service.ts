@@ -22,7 +22,7 @@ const isEnglish = (): boolean => {
 export class AIService {
   private config: AIConfig = {
     provider: 'openai',
-    model: 'gpt-4o-mini',
+    model: 'gpt-5.6-terra',
     apiKey: '',
     endpoint: '',
     azureEndpoint: '',
@@ -42,7 +42,7 @@ export class AIService {
 
       this.config = {
         provider: (result.ai_provider as ProviderKey) || 'openai',
-        model: result.ai_model || 'gpt-4o-mini',
+        model: result.ai_model || 'gpt-5.6-terra',
         apiKey: result.api_key || '',
         endpoint: result.api_endpoint || '',
         azureEndpoint: result.azure_endpoint || '',
@@ -57,8 +57,22 @@ export class AIService {
   }
 
   isConfigured(): boolean {
-    if (this.config.provider === 'ollama') return true;
-    return !!this.config.apiKey;
+    if (this.config.provider === 'ollama') {
+      return Boolean(this.config.model.trim());
+    }
+    if (!this.config.apiKey || !this.config.model.trim()) {
+      return false;
+    }
+    if (this.config.provider === 'custom') {
+      return Boolean(this.config.endpoint?.trim());
+    }
+    if (this.config.provider === 'azure') {
+      return Boolean(
+        this.config.azureEndpoint?.trim() &&
+          this.config.azureDeployment?.trim(),
+      );
+    }
+    return true;
   }
 
   getConfig(): AIConfig {
@@ -96,7 +110,7 @@ export class AIService {
       ]);
       this.config = {
         provider: 'openai',
-        model: 'gpt-4o-mini',
+        model: 'gpt-5.6-terra',
         apiKey: '',
         endpoint: '',
         azureEndpoint: '',
@@ -111,7 +125,8 @@ export class AIService {
 
   private getApiEndpoint(): string {
     if (this.config.provider === 'azure') {
-      return `${this.config.azureEndpoint}/openai/deployments/${this.config.azureDeployment}/chat/completions?api-version=2024-02-15-preview`;
+      const endpoint = this.config.azureEndpoint?.replace(/\/+$/, '') || '';
+      return `${endpoint}/openai/v1/chat/completions`;
     }
     if (this.config.endpoint) {
       return this.config.endpoint;
@@ -142,15 +157,19 @@ export class AIService {
   }
 
   private buildRequestBody(messages: ChatMessage[], temperature: number): object {
+    const requestModel =
+      this.config.provider === 'azure'
+        ? this.config.azureDeployment || this.config.model
+        : this.config.model;
+
     if (this.config.provider === 'anthropic') {
       const systemMessage = messages.find((m) => m.role === 'system');
       const otherMessages = messages.filter((m) => m.role !== 'system');
 
       return {
-        model: this.config.model,
+        model: requestModel,
         messages: otherMessages,
         system: systemMessage?.content || undefined,
-        temperature: temperature,
         max_tokens: 2000,
       };
     } else if (this.config.provider === 'google') {
@@ -167,17 +186,48 @@ export class AIService {
         contents: contents,
         systemInstruction: systemMessage ? { parts: [{ text: systemMessage.content }] } : undefined,
         generationConfig: {
-          temperature: temperature,
           maxOutputTokens: 2000,
         },
       };
     } else {
-      return {
-        model: this.config.model,
+      const isGpt5Model =
+        ((this.config.provider === 'openai' ||
+          this.config.provider === 'azure' ||
+          this.config.provider === 'custom') &&
+          this.config.model.startsWith('gpt-5')) ||
+        (this.config.provider === 'openrouter' &&
+          this.config.model.startsWith('openai/gpt-5'));
+      const isKimiModel =
+        this.config.provider === 'kimi' ||
+        (this.config.provider === 'openrouter' &&
+          this.config.model.startsWith('moonshotai/kimi-k'));
+      const usesCompletionTokenLimit =
+        isGpt5Model ||
+        isKimiModel ||
+        this.config.provider === 'qwen' ||
+        this.config.provider === 'minimax';
+      const rejectsSamplingParameters =
+        isGpt5Model ||
+        isKimiModel ||
+        (this.config.provider === 'openrouter' &&
+          (this.config.model.startsWith('anthropic/claude-') ||
+            this.config.model.startsWith('google/gemini-3')));
+      const requestBody: Record<string, unknown> = {
+        model: requestModel,
         messages: messages,
-        temperature: temperature,
-        max_tokens: 2000,
       };
+
+      if (usesCompletionTokenLimit) {
+        requestBody.max_completion_tokens = 2000;
+      } else {
+        requestBody.max_tokens = 2000;
+      }
+
+      if (!rejectsSamplingParameters) {
+        requestBody.temperature = temperature;
+      }
+
+      return requestBody;
     }
   }
 
@@ -197,6 +247,27 @@ export class AIService {
         ? 'API Key not configured. Please configure it in settings.'
         : 'API Key 未配置，请先在设置中配置';
       throw new Error(errorMsg);
+    }
+    if (!this.config.model.trim()) {
+      throw new Error(isEnglish() ? 'Model name is required.' : '请输入模型名称');
+    }
+    if (this.config.provider === 'custom' && !this.config.endpoint?.trim()) {
+      throw new Error(
+        isEnglish()
+          ? 'API endpoint is required for a custom provider.'
+          : '自定义服务需要填写 API 端点',
+      );
+    }
+    if (
+      this.config.provider === 'azure' &&
+      (!this.config.azureEndpoint?.trim() ||
+        !this.config.azureDeployment?.trim())
+    ) {
+      throw new Error(
+        isEnglish()
+          ? 'Azure endpoint and deployment name are required.'
+          : '需要填写 Azure 端点和部署名称',
+      );
     }
 
     try {

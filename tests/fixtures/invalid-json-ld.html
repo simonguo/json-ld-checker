@@ -1,0 +1,17 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Invalid JSON-LD</title>
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "Product",
+        "name": "",
+        "image": "not-a-url",
+        "offers": [{ "price": "19.999", "priceCurrency": "US" }]
+      }
+    </script>
+  </head>
+  <body><main><h1>Invalid schema fixture</h1></main></body>
+</html>
