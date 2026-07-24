@@ -1,11 +1,7 @@
 // Background service worker
 
 import { validator } from './lib/validator';
-
-// Debug: Log UI language
-const uiLang = chrome.i18n.getUILanguage ? chrome.i18n.getUILanguage() : 'unknown';
-console.log('[Background] Chrome UI Language:', uiLang);
-console.log('[Background] Test message (settings):', chrome.i18n.getMessage('settings'));
+import { RELEASES_URL } from './config/project';
 
 // ============================================
 // Version Update Detection & Management
@@ -16,14 +12,12 @@ chrome.runtime.onInstalled.addListener((details) => {
   const currentVersion = chrome.runtime.getManifest().version;
   
   if (details.reason === 'install') {
-    console.log('[Background] Extension installed, version:', currentVersion);
     // Open welcome page on first install
     chrome.tabs.create({
       url: chrome.runtime.getURL('src/pages/options/index.html')
     });
   } else if (details.reason === 'update') {
     const previousVersion = details.previousVersion;
-    console.log('[Background] Extension updated from', previousVersion, 'to', currentVersion);
     
     // Store update info for showing changelog and clear the pending-update flags
     // since the update has now been applied.
@@ -43,8 +37,6 @@ chrome.runtime.onInstalled.addListener((details) => {
 
 // Listen for update available event
 chrome.runtime.onUpdateAvailable.addListener((details) => {
-  console.log('[Background] Update available:', details.version);
-  
   // Store that an update is available
   chrome.storage.local.set({
     updateAvailable: true,
@@ -84,7 +76,7 @@ chrome.notifications.onButtonClicked.addListener((notificationId, buttonIndex) =
     if (buttonIndex === 0) {
       // View Changelog
       chrome.tabs.create({
-        url: 'https://github.com/your-username/json-ld-checker/releases'
+        url: RELEASES_URL
       });
     }
     chrome.notifications.clear(notificationId);
@@ -105,20 +97,6 @@ function showUpdateNotification(fromVersion: string, toVersion: string) {
     requireInteraction: false
   });
 }
-
-// Periodically check for updates (every 6 hours)
-const UPDATE_CHECK_INTERVAL = 6 * 60 * 60 * 1000; // 6 hours
-setInterval(() => {
-  chrome.runtime.requestUpdateCheck((status, details) => {
-    if (status === 'update_available') {
-      console.log('[Background] Update check: update available', details?.version);
-    } else if (status === 'no_update') {
-      console.log('[Background] Update check: no update available');
-    } else if (status === 'throttled') {
-      console.log('[Background] Update check: throttled');
-    }
-  });
-}, UPDATE_CHECK_INTERVAL);
 
 // ============================================
 // Icon Management

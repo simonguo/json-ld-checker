@@ -1,45 +1,116 @@
 # JSON-LD Checker
 
-JSON-LD Checker is a Chromium extension that inspects, validates, and visualizes JSON-LD structured data directly from the browser side panel.
+[![CI](https://github.com/simonguo/json-ld-checker/actions/workflows/ci.yml/badge.svg)](https://github.com/simonguo/json-ld-checker/actions/workflows/ci.yml)
+[![MIT License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![Chrome Manifest V3](https://img.shields.io/badge/Chrome-Manifest%20V3-4285F4.svg)](manifest.json)
 
-## Highlights
+JSON-LD Checker is an open-source Chromium extension for inspecting, validating,
+and improving JSON-LD structured data without leaving the current page. Its UI
+follows Chrome DevTools conventions so developers can scan schemas, locate
+issues, and review source data quickly.
 
-- Auto-detects JSON-LD on any page and surfaces status in the toolbar icon.
-- Developer-focused side panel with Inspector, Issues, History, and secondary AI tools.
-- Built-in validator covering missing fields, wrong data types, malformed URLs, and SEO recommendations.
-- Validation issues include JSONPath locations that jump back to the relevant tree node.
-- AI Review explains existing markup; Generate Draft proposes JSON-LD even when none exists.
-- Internationalized UI with automatic language detection and manual language switcher (System / English / 中文).
+[简体中文](README.zh-CN.md)
 
-## Install
+## Features
 
-1. Clone or download this repository.
-2. Run `npm install` and `npm run build`.
-3. Open `chrome://extensions` (or `edge://extensions`) and enable **Developer mode**.
-4. Choose **Load unpacked** and select the generated `dist/` directory.
+- Detects JSON-LD blocks on the current page and reports their status in the
+  extension icon.
+- Provides a DevTools-style side panel with Inspector, Issues, and History.
+- Switches cleanly between multiple schemas and identifies each schema by
+  `@type`.
+- Validates nested objects, arrays, and `@graph` entries with precise JSONPath
+  locations.
+- Opens an issue directly in the Inspector and falls back to the nearest
+  existing ancestor for missing fields.
+- Offers a local Source draft editor that never modifies the inspected page.
+- Exports JSON-LD and validation reports.
+- Optionally reviews or drafts JSON-LD through OpenAI, Anthropic, Gemini, Azure
+  OpenAI, OpenRouter, DeepSeek, Qwen, Kimi, Zhipu GLM, MiniMax, Ollama, or a
+  custom OpenAI-compatible endpoint.
+- Supports English and Simplified Chinese.
 
-Optional: run `node create-icons.js` (requires `npm install canvas`) to regenerate icons.
+## Requirements
 
-## Getting Started
+- Chrome 114+, Microsoft Edge 114+, or another compatible Chromium browser.
+- Node.js 20.19+ and npm 10+ for local development.
 
-1. Browse to any page and open the side panel from the extension icon.
-2. Use Inspector for the tree or local source draft, and Issues for validation results.
-3. Use the schema selector when multiple JSON-LD blocks are detected; open AI from the compact toolbar when needed.
+## Install from Source
 
-### Configure AI
+```bash
+git clone https://github.com/simonguo/json-ld-checker.git
+cd json-ld-checker
+npm ci
+npm run build
+```
 
-1. Click the ⚙️ button to open the settings page.
-2. Enter your OpenAI API key, test the connection, then save.
-3. AI responses follow the selected language preference.
+Then:
 
-## Development Notes
+1. Open `chrome://extensions` or `edge://extensions`.
+2. Enable **Developer mode**.
+3. Select **Load unpacked**.
+4. Choose the generated `dist/` directory.
 
-- Manifest V3 + React + TypeScript, built with Vite and CRXJS.
-- Run `npm run type-check`, `npm test`, and `npm run build` before loading `dist/` as an unpacked extension.
-- Local JSON-LD QA pages live in `tests/fixtures/`.
+## Development
 
-## Contributing & License
+```bash
+npm run dev          # Start the extension development server
+npm run dev:visual   # Open the standalone side-panel visual harness
+npm run type-check   # Run TypeScript checks
+npm test             # Run the Vitest test suite
+npm run build        # Create a production build
+npm run licenses     # Refresh third-party software notices
+npm run check        # Run the full CI validation sequence
+```
 
-Pull requests and issues are welcome.
+Local JSON-LD fixtures are available in `tests/fixtures/`.
 
-Released under the MIT License.
+## AI Configuration
+
+AI features are optional. Open the extension settings, select a provider and
+model, then enter the provider API key. Custom endpoints require a complete
+Chat Completions URL and an exact model ID.
+
+API keys are stored in Chrome local extension storage. When an AI feature is
+used, relevant page information is sent directly to the provider selected by
+the user. See [Privacy](PRIVACY.md) for details.
+
+## Permissions
+
+The extension requests access to all page URLs so it can inspect JSON-LD on the
+active page. It also uses:
+
+- `activeTab` and `scripting` to scan the current page on demand.
+- `sidePanel` to host the developer interface.
+- `storage` for settings, local drafts, and history.
+- `notifications` for extension update notifications.
+
+JSON-LD inspection and local validation run in the browser. The project does
+not include analytics or telemetry.
+
+## Project Structure
+
+```text
+src/
+├── components/ui/       Shared DevTools-style primitives
+├── config/              Provider and project metadata
+├── lib/                 Validation, paths, history, AI, and i18n
+├── pages/options/       Settings page
+└── pages/sidepanel/     Inspector, Issues, History, and AI tools
+tests/
+├── fixtures/            Manual JSON-LD test pages
+└── visual/              Standalone side-panel visual harness
+```
+
+## Contributing
+
+Issues and pull requests are welcome. Please read
+[CONTRIBUTING.md](CONTRIBUTING.md) and the
+[Code of Conduct](CODE_OF_CONDUCT.md) before contributing.
+
+Security vulnerabilities should be reported privately according to
+[SECURITY.md](SECURITY.md).
+
+## License
+
+Released under the [MIT License](LICENSE). Bundled dependencies and their
+licenses are listed in [THIRD_PARTY_NOTICES.txt](THIRD_PARTY_NOTICES.txt).

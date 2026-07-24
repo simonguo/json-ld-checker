@@ -202,7 +202,7 @@ export default {
   privacyNotice: '隐私说明',
   privacyWarning: '使用 AI 功能时，页面的 JSON-LD 数据和基本信息（URL、标题等）会发送到您选择的 AI 服务商进行分析。',
   privacyPolicy: '请确保您了解并同意所选 AI 服务商的隐私政策和使用条款。',
-  privacyStorage: 'API Key 仅存储在您的浏览器本地，不会发送到任何第三方服务器。',
+  privacyStorage: 'API Key 存储在浏览器本地，仅在执行 AI 请求时发送到当前配置的服务商端点。',
 
   // Language Options
   autoDetect: '自动检测（跟随系统）',

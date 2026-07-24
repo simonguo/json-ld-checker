@@ -14,7 +14,7 @@ export default function OptionsPage() {
   const [activeView, setActiveView] = useState<SettingsView>('general');
   const version = typeof chrome !== 'undefined' && chrome.runtime?.getManifest
     ? chrome.runtime.getManifest().version
-    : '2.3.2';
+    : 'development';
 
   const navigation = [
     { value: 'general' as const, label: t('general'), icon: SlidersHorizontal },

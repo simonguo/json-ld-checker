@@ -202,7 +202,7 @@ export default {
   privacyNotice: 'Privacy Notice',
   privacyWarning: "When using AI features, the page's JSON-LD data and basic information (URL, title, etc.) will be sent to your selected AI provider for analysis.",
   privacyPolicy: "Please ensure you understand and agree to your AI provider's privacy policy and terms of use.",
-  privacyStorage: 'API Key is only stored locally in your browser and will not be sent to any third-party servers.',
+  privacyStorage: 'The API Key is stored locally and is sent only to the configured provider endpoint when you run an AI request.',
 
   // Language Options
   autoDetect: 'Auto Detect (System)',

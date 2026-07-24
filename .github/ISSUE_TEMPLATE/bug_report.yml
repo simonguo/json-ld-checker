@@ -1,0 +1,82 @@
+name: Bug report
+description: Report a reproducible problem with JSON-LD Checker.
+title: "[Bug]: "
+labels:
+  - bug
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for helping improve JSON-LD Checker. Do not include API keys, private page content, or other secrets.
+
+  - type: input
+    id: version
+    attributes:
+      label: Extension version
+      description: Find this in Settings → Updates & About.
+      placeholder: 2.3.2
+    validations:
+      required: true
+
+  - type: input
+    id: chrome
+    attributes:
+      label: Chrome version
+      placeholder: 126.0.6478.127
+    validations:
+      required: true
+
+  - type: dropdown
+    id: source
+    attributes:
+      label: Installation source
+      options:
+        - Chrome Web Store
+        - Unpacked development build
+        - GitHub release
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: What happened?
+      description: Describe the problem and what you expected instead.
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Reproduction steps
+      placeholder: |
+        1. Open ...
+        2. Click ...
+        3. Observe ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: jsonld
+    attributes:
+      label: Minimal JSON-LD sample
+      description: Remove personal or confidential information before sharing.
+      render: json
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant logs
+      description: Paste only the relevant console output. Remove secrets first.
+      render: shell
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Checklist
+      options:
+        - label: I searched existing issues for duplicates.
+          required: true
+        - label: I removed API keys and private data from this report.
+          required: true

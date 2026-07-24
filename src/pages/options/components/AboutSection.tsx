@@ -1,5 +1,6 @@
-import { ExternalLink, Github, Mail } from 'lucide-react';
+import { CircleDot, ExternalLink, Github, Mail, ShieldCheck } from 'lucide-react';
 import { UpdateNotification } from '@/components/UpdateNotification';
+import { ISSUES_URL, PRIVACY_URL, PROJECT_URL } from '@/config/project';
 import { SettingsSection, type Translator } from './SettingsSection';
 
 export function AboutSection({
@@ -25,12 +26,28 @@ export function AboutSection({
           </div>
           <div className="flex flex-wrap gap-2">
             <a
-              href="https://github.com/simonguo/"
+              href={PROJECT_URL}
               target="_blank"
               rel="noreferrer"
               className="inline-flex min-h-8 items-center gap-1.5 rounded-tool border border-border bg-surface px-2.5 py-1 text-xs font-medium text-ink hover:bg-gray-50"
             >
               <Github size={14} /> GitHub
+            </a>
+            <a
+              href={ISSUES_URL}
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex min-h-8 items-center gap-1.5 rounded-tool border border-border bg-surface px-2.5 py-1 text-xs font-medium text-ink hover:bg-gray-50"
+            >
+              <CircleDot size={14} /> {t('reportBug')}
+            </a>
+            <a
+              href={PRIVACY_URL}
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex min-h-8 items-center gap-1.5 rounded-tool border border-border bg-surface px-2.5 py-1 text-xs font-medium text-ink hover:bg-gray-50"
+            >
+              <ShieldCheck size={14} /> {t('privacyNotice')}
             </a>
             <a
               href="mailto:simonguo.2009@gmail.com?subject=JSON-LD%20Checker%20Feedback"

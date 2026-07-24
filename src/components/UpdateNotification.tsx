@@ -22,7 +22,7 @@ export function UpdateNotification({ language = 'auto' }: { language?: string })
       setStatus({
         updateAvailable: false,
         showUpdateNotification: false,
-        currentVersion: '2.3.2',
+        currentVersion: 'development',
       });
       return;
     }

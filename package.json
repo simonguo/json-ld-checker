@@ -1,12 +1,39 @@
 {
   "name": "json-ld-checker",
   "version": "2.3.2",
+  "description": "A developer-focused Chromium extension for inspecting and validating JSON-LD structured data.",
   "type": "module",
   "private": true,
+  "license": "MIT",
+  "author": "Simon Guo",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/simonguo/json-ld-checker.git"
+  },
+  "bugs": {
+    "url": "https://github.com/simonguo/json-ld-checker/issues"
+  },
+  "homepage": "https://github.com/simonguo/json-ld-checker#readme",
+  "keywords": [
+    "chrome-extension",
+    "json-ld",
+    "schema-org",
+    "seo",
+    "structured-data"
+  ],
+  "engines": {
+    "node": ">=20.19",
+    "npm": ">=10"
+  },
   "scripts": {
     "dev": "vite",
+    "dev:visual": "vite --config tests/visual/vite.config.ts",
     "build": "tsc && vite build",
     "preview": "vite preview",
+    "check": "npm run check:version && npm run check:licenses && npm run type-check && npm test && npm run build",
+    "check:licenses": "node scripts/generate-third-party-notices.mjs --check",
+    "check:version": "node scripts/check-version.mjs",
+    "licenses": "node scripts/generate-third-party-notices.mjs",
     "type-check": "tsc --noEmit",
     "test": "vitest run"
   },
@@ -25,14 +52,14 @@
     "@types/node": "^20.11.5",
     "@types/react": "^18.2.48",
     "@types/react-dom": "^18.2.18",
-    "@vitejs/plugin-react": "^4.2.1",
+    "@vitejs/plugin-react": "^5.2.0",
     "autoprefixer": "^10.4.17",
     "jsdom": "^29.1.1",
     "postcss": "^8.4.33",
     "tailwindcss": "^3.4.1",
     "terser": "^5.46.2",
     "typescript": "^5.3.3",
-    "vite": "^5.0.12",
+    "vite": "^8.1.5",
     "vitest": "^4.1.10"
   }
 }
