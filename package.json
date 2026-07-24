@@ -1,6 +1,6 @@
 {
   "name": "json-ld-checker",
-  "version": "2.3.2",
+  "version": "2.4.0",
   "description": "A developer-focused Chromium extension for inspecting and validating JSON-LD structured data.",
   "type": "module",
   "private": true,
@@ -35,7 +35,7 @@
     "check:version": "node scripts/check-version.mjs",
     "licenses": "node scripts/generate-third-party-notices.mjs",
     "type-check": "tsc --noEmit",
-    "test": "vitest run"
+    "test": "vitest run && node --test scripts/*.node-test.mjs"
   },
   "dependencies": {
     "lucide-react": "^0.460.0",

@@ -10,9 +10,9 @@ permissions:
 
 jobs:
   release:
-    name: Build release package
+    name: Build and publish release
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
 
     steps:
       - name: Check out repository
@@ -43,4 +43,19 @@ jobs:
       - name: Create GitHub release
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh release create "$GITHUB_REF_NAME" "json-ld-checker-${GITHUB_REF_NAME}.zip" --generate-notes --verify-tag
+        run: |
+          if gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1; then
+            gh release upload "$GITHUB_REF_NAME" "json-ld-checker-${GITHUB_REF_NAME}.zip" --clobber
+          else
+            gh release create "$GITHUB_REF_NAME" "json-ld-checker-${GITHUB_REF_NAME}.zip" --generate-notes --verify-tag
+          fi
+
+      - name: Publish to Chrome Web Store
+        env:
+          CWS_SERVICE_ACCOUNT_JSON: ${{ secrets.CWS_SERVICE_ACCOUNT_JSON }}
+          CWS_PUBLISHER_ID: ${{ secrets.CWS_PUBLISHER_ID }}
+          CWS_EXTENSION_ID: ${{ secrets.CWS_EXTENSION_ID }}
+          CWS_PACKAGE_PATH: json-ld-checker-${{ github.ref_name }}.zip
+          CWS_EXPECTED_VERSION: ${{ github.ref_name }}
+          CWS_PUBLISH_TYPE: DEFAULT_PUBLISH
+        run: node scripts/publish-chrome-web-store.mjs

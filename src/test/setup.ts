@@ -28,7 +28,7 @@ Object.defineProperty(globalThis, 'chrome', {
       },
     },
     runtime: {
-      getManifest: vi.fn(() => ({ version: '2.3.2' })),
+      getManifest: vi.fn(() => ({ version: '2.4.0' })),
       openOptionsPage: vi.fn(),
       sendMessage: vi.fn(() => Promise.resolve(null)),
     },

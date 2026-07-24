@@ -10,7 +10,7 @@ afterEach(cleanup);
 
 describe('AboutSection', () => {
   it('links to the open-source repository and its issue tracker', () => {
-    render(<AboutSection version="2.3.2" language="en" t={t} />);
+    render(<AboutSection version="2.4.0" language="en" t={t} />);
 
     expect(screen.getByRole('link', { name: /GitHub/i })).toHaveAttribute(
       'href',

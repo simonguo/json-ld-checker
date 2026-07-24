@@ -14,7 +14,7 @@ body:
     attributes:
       label: Extension version
       description: Find this in Settings → Updates & About.
-      placeholder: 2.3.2
+      placeholder: 2.4.0
     validations:
       required: true
 

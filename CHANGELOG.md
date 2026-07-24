@@ -6,6 +6,8 @@ project follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [2.4.0] - 2026-07-24
+
 ### Added
 
 - Open-source project documentation, policies, templates, and automation.
@@ -28,5 +30,6 @@ project follows [Semantic Versioning](https://semver.org/).
 - Current reasoning models use provider-compatible token and sampling
   parameters.
 
-[Unreleased]: https://github.com/simonguo/json-ld-checker/compare/v2.3.2...HEAD
+[Unreleased]: https://github.com/simonguo/json-ld-checker/compare/v2.4.0...HEAD
+[2.4.0]: https://github.com/simonguo/json-ld-checker/releases/tag/v2.4.0
 [2.3.2]: https://github.com/simonguo/json-ld-checker/releases/tag/v2.3.2

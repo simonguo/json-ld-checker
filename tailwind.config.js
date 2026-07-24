@@ -1,9 +1,11 @@
 /** @type {import('tailwindcss').Config} */
+const includeVisualFixtures = process.env.npm_lifecycle_event === 'dev:visual';
+
 export default {
   content: [
     "./index.html",
     "./src/**/*.{js,ts,jsx,tsx}",
-    "./tests/visual/**/*.{html,ts,tsx}",
+    ...(includeVisualFixtures ? ["./tests/visual/**/*.{html,ts,tsx}"] : []),
     "./*.html"
   ],
   theme: {

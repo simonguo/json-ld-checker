@@ -25,35 +25,56 @@ import { validator } from '../../src/lib/validator';
   },
   storage: {
     local: {
-      get: async () => ({
-        page_history: [
-          {
-            url: 'https://developer.example/keyboards/dev-75',
-            title: 'Developer Keyboard',
-            timestamp: Date.now() - 120_000,
-            jsonLdCount: 2,
-            errorCount: 1,
-            warningCount: 0,
-            suggestionCount: 2,
-            types: ['Product', 'BreadcrumbList'],
-          },
-          {
-            url: 'https://docs.example/schema',
-            title: 'Structured Data Guide',
-            timestamp: Date.now() - 7_200_000,
-            jsonLdCount: 1,
-            errorCount: 0,
-            warningCount: 0,
-            suggestionCount: 0,
-            types: ['TechArticle'],
-          },
-        ],
-      }),
+      get: async (
+        _keys: string[] | string,
+        callback?: (result: Record<string, unknown>) => void,
+      ) => {
+        const result = {
+          ai_provider: 'openai',
+          ai_model: 'gpt-5.6-terra',
+          api_key: 'visual-fixture-key',
+          user_language: 'en',
+          page_history: [
+            {
+              url: 'https://developer.example/keyboards/dev-75',
+              title: 'Developer Keyboard',
+              timestamp: Date.now() - 120_000,
+              jsonLdCount: 2,
+              errorCount: 1,
+              warningCount: 0,
+              suggestionCount: 2,
+              types: ['Product', 'BreadcrumbList'],
+            },
+            {
+              url: 'https://docs.example/schema',
+              title: 'Structured Data Guide',
+              timestamp: Date.now() - 7_200_000,
+              jsonLdCount: 1,
+              errorCount: 0,
+              warningCount: 0,
+              suggestionCount: 0,
+              types: ['TechArticle'],
+            },
+          ],
+        };
+        callback?.(result);
+        return result;
+      },
       set: async () => undefined,
       remove: async () => undefined,
     },
     session: {
-      get: (_keys: string[], callback: (result: Record<string, unknown>) => void) => callback({}),
+      get: (_keys: string[], callback: (result: Record<string, unknown>) => void) => callback({
+        aiCheck_visual_fixture: [
+          '## Review summary',
+          '',
+          '**Schema quality: Good**',
+          '',
+          '- Product identity and offer data are valid.',
+          '- Add `aggregateRating` when verified review data is available.',
+          '- Keep price and availability synchronized with the page.',
+        ].join('\n'),
+      }),
       set: () => undefined,
     },
     onChanged: {
@@ -95,8 +116,15 @@ const schemas = [
   },
 ];
 
+function getInitialView(): SidePanelView {
+  const requested = new URLSearchParams(window.location.search).get('view');
+  return requested === 'issues' || requested === 'history' || requested === 'assist'
+    ? requested
+    : 'inspector';
+}
+
 function SidePanelVisualFixture() {
-  const [currentView, setCurrentView] = useState<SidePanelView>('inspector');
+  const [currentView, setCurrentView] = useState<SidePanelView>(getInitialView);
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [focusRequest, setFocusRequest] = useState<FocusRequest | null>(null);
   const focusToken = useRef(0);
@@ -167,7 +195,7 @@ function SidePanelVisualFixture() {
         {currentView === 'assist' ? (
           <AssistView
             data={data}
-            cacheKey="visual-fixture"
+            cacheKey="visual_fixture"
             onClose={() => setCurrentView('inspector')}
           />
         ) : currentView === 'history' ? (

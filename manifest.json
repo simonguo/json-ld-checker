@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "JSON-LD Checker",
-  "version": "2.3.2",
+  "version": "2.4.0",
   "description": "Inspect, validate, and improve JSON-LD structured data from a developer-focused browser side panel.",
   "homepage_url": "https://github.com/simonguo/json-ld-checker",
   "minimum_chrome_version": "114",
