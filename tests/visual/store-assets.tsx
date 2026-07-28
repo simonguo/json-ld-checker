@@ -10,23 +10,28 @@ import {
 } from 'lucide-react';
 import '../../src/index.css';
 
-type ScreenshotView = 'inspector' | 'issues' | 'assist' | 'settings';
+type ScreenshotView = 'inspector' | 'parse-error' | 'issues' | 'report' | 'assist';
 type AssetName =
   | 'screenshot-inspector'
+  | 'screenshot-parse-error'
   | 'screenshot-issues'
+  | 'screenshot-report'
   | 'screenshot-ai'
-  | 'screenshot-settings'
   | 'promo-small'
   | 'promo-marquee';
 
 const asset = (
   new URLSearchParams(window.location.search).get('asset') || 'screenshot-inspector'
 ) as AssetName;
+const language =
+  new URLSearchParams(window.location.search).get('lang') === 'zh-CN'
+    ? 'zh-CN'
+    : 'en';
 
 document.documentElement.style.cursor = 'none';
 document.body.style.cursor = 'none';
 
-const screenshots: Record<
+type ScreenshotContent = Record<
   Exclude<AssetName, 'promo-small' | 'promo-marquee'>,
   {
     eyebrow: string;
@@ -35,7 +40,9 @@ const screenshots: Record<
     points: string[];
     view: ScreenshotView;
   }
-> = {
+>;
+
+const screenshotsEn: ScreenshotContent = {
   'screenshot-inspector': {
     eyebrow: 'INSPECTOR',
     title: 'Structured data,\ninspected like code.',
@@ -44,13 +51,29 @@ const screenshots: Record<
     points: ['Tree + source views', 'Search, copy, export', 'Multiple schemas'],
     view: 'inspector',
   },
+  'screenshot-parse-error': {
+    eyebrow: 'SYNTAX DIAGNOSTICS',
+    title: 'Broken JSON-LD\nnever disappears.',
+    description:
+      'Keep every original block and pinpoint malformed JSON with a line, column and source excerpt.',
+    points: ['Exact line + column', 'Original source preserved', 'Copy or download the block'],
+    view: 'parse-error',
+  },
   'screenshot-issues': {
     eyebrow: 'ISSUES',
-    title: 'Fix the field,\nnot just the error.',
+    title: 'Fix locally.\nConfirm officially.',
     description:
-      'See severity, guidance and the exact JSONPath. Jump straight back to the failing node.',
-    points: ['Precise JSONPath', 'Severity filters', 'One-click navigation'],
+      'Navigate exact JSONPath issues, then open Google or Schema.org validators with one click.',
+    points: ['Precise JSONPath', 'Local checks labeled clearly', 'Official validator shortcuts'],
     view: 'issues',
+  },
+  'screenshot-report': {
+    eyebrow: 'REPORTS',
+    title: 'Share the evidence,\nnot a screenshot.',
+    description:
+      'Turn raw blocks, parse errors and local findings into a focused HTML or PDF-ready report.',
+    points: ['Raw blocks included', 'HTML download', 'Print or save as PDF'],
+    view: 'report',
   },
   'screenshot-ai': {
     eyebrow: 'AI TOOLS',
@@ -60,15 +83,47 @@ const screenshots: Record<
     points: ['Review current markup', 'Generate local drafts', 'Bring your own key'],
     view: 'assist',
   },
-  'screenshot-settings': {
-    eyebrow: 'MODEL PROVIDERS',
-    title: 'Works with the\nmodels you choose.',
-    description:
-      'Configure global and Chinese providers, local Ollama, or any OpenAI-compatible endpoint.',
-    points: ['Global + China providers', 'Custom endpoints', 'Local Ollama'],
-    view: 'settings',
+};
+
+const screenshotsZh: ScreenshotContent = {
+  'screenshot-inspector': {
+    eyebrow: '检查器',
+    title: '像读代码一样\n检查结构化数据。',
+    description: '无需离开当前页面，即可在紧凑的树形或源码视图中查看每个 JSON-LD 代码块。',
+    points: ['树形与源码视图', '搜索、复制与导出', '多个 Schema'],
+    view: 'inspector',
+  },
+  'screenshot-parse-error': {
+    eyebrow: '语法诊断',
+    title: '错误的 JSON-LD\n不会再消失。',
+    description: '保留每个原始代码块，通过行号、列号和源码片段精确定位错误 JSON。',
+    points: ['准确行号与列号', '保留原始源码', '复制或下载代码块'],
+    view: 'parse-error',
+  },
+  'screenshot-issues': {
+    eyebrow: '问题',
+    title: '本地定位问题，\n官方工具确认。',
+    description: '导航到准确 JSONPath，再一键使用 Google 或 Schema.org 官方验证工具。',
+    points: ['准确 JSONPath', '明确标注本地检查', '官方验证快捷入口'],
+    view: 'issues',
+  },
+  'screenshot-report': {
+    eyebrow: '报告',
+    title: '分享检查证据，\n不只是截图。',
+    description: '将原始代码块、解析错误和本地检查结果生成聚焦的 HTML 或 PDF 报告。',
+    points: ['包含原始代码块', '下载 HTML', '打印或保存为 PDF'],
+    view: 'report',
+  },
+  'screenshot-ai': {
+    eyebrow: 'AI 工具',
+    title: '需要时使用 AI，\n始终本地优先。',
+    description: '使用你信任的服务商检查现有标记或生成本地草稿。',
+    points: ['检查当前标记', '生成本地草稿', '使用自己的 API Key'],
+    view: 'assist',
   },
 };
+
+const screenshots = language === 'zh-CN' ? screenshotsZh : screenshotsEn;
 
 function BrandMark({ dark = false }: { dark?: boolean }) {
   return (
@@ -130,14 +185,16 @@ function SitePreview() {
 function BrowserWindow({
   view,
   compact = false,
+  locale = 'en',
 }: {
   view: ScreenshotView;
   compact?: boolean;
+  locale?: 'en' | 'zh-CN';
 }) {
-  const isSettings = view === 'settings';
-  const source = isSettings
-    ? '/tests/visual/settings.html'
-    : `/tests/visual/sidepanel.html?view=${view}`;
+  const isReport = view === 'report';
+  const source = isReport
+    ? `/report.html?id=visual-fixture&lang=${locale}`
+    : `/sidepanel.html?view=${view}&lang=${locale}`;
 
   return (
     <div
@@ -158,9 +215,9 @@ function BrowserWindow({
         </div>
       </div>
 
-      {isSettings ? (
+      {isReport ? (
         <iframe
-          title="JSON-LD Checker settings"
+          title="JSON-LD inspection report"
           src={source}
           className="block w-full border-0 bg-white"
           style={{ height: 'calc(100% - 40px)' }}
@@ -202,7 +259,7 @@ function ScreenshotCanvas({
               JSON-LD Checker
             </div>
             <div className="font-mono text-[10px] text-[#59636e]">
-              Developer tools for structured data
+              {language === 'zh-CN' ? '结构化数据开发工具' : 'Developer tools for structured data'}
             </div>
           </div>
         </div>
@@ -230,12 +287,9 @@ function ScreenshotCanvas({
       </section>
 
       <div
-        className={[
-          'absolute right-12 top-[62px] h-[676px]',
-          item.view === 'settings' ? 'w-[790px]' : 'w-[800px]',
-        ].join(' ')}
+        className="absolute right-12 top-[62px] h-[676px] w-[800px]"
       >
-        <BrowserWindow view={item.view} />
+        <BrowserWindow view={item.view} locale={language} />
       </div>
     </div>
   );

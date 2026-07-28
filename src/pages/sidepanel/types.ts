@@ -1,10 +1,7 @@
 import type { JsonPath } from '@/lib/json-path';
+import type { JsonLdScanResult } from '@/lib/json-ld';
 
-export interface JsonLdData {
-  found: boolean;
-  count: number;
-  data: any[];
-}
+export type JsonLdData = JsonLdScanResult;
 export type SidePanelView = 'inspector' | 'issues' | 'history' | 'assist';
 
 export interface FocusRequest {

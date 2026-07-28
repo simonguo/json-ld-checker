@@ -6,11 +6,13 @@ import { AiProviderSection } from './components/AiProviderSection';
 import { GeneralSection } from './components/GeneralSection';
 import { OnboardingChecklist } from './components/OnboardingChecklist';
 import { useSettings } from './hooks/useSettings';
+import { useAutomaticDetection } from './hooks/useAutomaticDetection';
 
 type SettingsView = 'general' | 'ai' | 'about';
 
 export default function OptionsPage() {
   const { t, state, actions } = useSettings();
+  const automaticDetection = useAutomaticDetection();
   const [activeView, setActiveView] = useState<SettingsView>('general');
   const version = typeof chrome !== 'undefined' && chrome.runtime?.getManifest
     ? chrome.runtime.getManifest().version
@@ -101,7 +103,13 @@ export default function OptionsPage() {
           {activeView === 'general' && (
             <GeneralSection
               language={state.settings.language}
+              autoDetection={automaticDetection.state.enabled}
+              autoDetectionChanging={
+                automaticDetection.state.loading || automaticDetection.state.changing
+              }
+              autoDetectionError={automaticDetection.state.error}
               onLanguageChange={actions.changeLanguage}
+              onAutoDetectionChange={automaticDetection.actions.change}
               t={t}
             />
           )}

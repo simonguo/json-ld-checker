@@ -1,6 +1,6 @@
 # Privacy
 
-Last updated: July 24, 2026
+Last updated: July 28, 2026
 
 JSON-LD Checker is designed to perform its core inspection and validation work
 locally in the browser.
@@ -37,9 +37,16 @@ page data, history, settings, drafts, or API keys through the extension.
 
 ## Permissions
 
-Access to page URLs is required to inspect JSON-LD on the active tab.
-`scripting`, `sidePanel`, `storage`, and `notifications` support scanning, the
-side-panel UI, local preferences, and update notices respectively.
+The default installation uses `activeTab` and `scripting` to read a page only
+after the user invokes the extension there. `sidePanel` hosts the interface and
+`storage` keeps local settings, drafts, history, reports, and one-time UI prompt
+state.
+
+Automatic detection is optional. When the user enables it in settings, Chrome
+asks for `<all_urls>` host access so the extension can scan completed page loads
+and update the icon badge. Turning automatic detection off removes that host
+permission and stops background page scanning. Revoking the permission in
+Chrome also disables the stored setting.
 
 ## Clearing Data
 

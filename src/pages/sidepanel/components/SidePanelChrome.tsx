@@ -10,6 +10,8 @@ import {
   Settings,
 } from 'lucide-react';
 import type { ValidationSummary } from '@/lib/validator';
+import type { JsonLdInspectionItem } from '@/lib/json-ld';
+import { formatJsonPath } from '@/lib/json-path';
 import type { SidePanelView } from '../types';
 
 const chromeIconButton =
@@ -177,27 +179,27 @@ export function PrimaryNav({
 }
 
 export function SchemaPicker({
-  data,
+  items,
   selectedIndex,
   onChange,
   getIssueCount,
   unknownType,
   schemaLabel,
 }: {
-  data: any[];
+  items: JsonLdInspectionItem[];
   selectedIndex: number;
   onChange: (index: number) => void;
-  getIssueCount: (data: any) => number;
+  getIssueCount: (item: JsonLdInspectionItem) => number;
   unknownType: string;
   schemaLabel: string;
 }) {
-  if (data.length < 2) return null;
+  if (items.length < 2) return null;
 
-  const selectedItem = data[selectedIndex];
-  const selectedType = selectedItem?.['@type'];
-  const selectedTypeLabel = selectedType
-    ? (Array.isArray(selectedType) ? selectedType.join(', ') : selectedType)
-    : unknownType;
+  const selectedItem = items[selectedIndex];
+  const selectedTypeLabel =
+    selectedItem?.kind === 'parse-error'
+      ? 'JSON parse error'
+      : selectedItem?.schemaTypes.join(', ') || unknownType;
   const issueCount = getIssueCount(selectedItem);
 
   return (
@@ -207,7 +209,7 @@ export function SchemaPicker({
           {schemaLabel}
         </span>
         <span className="flex-none font-mono text-[9px] text-[#5f6368]">
-          {selectedIndex + 1}:{data.length}
+          {selectedIndex + 1}:{items.length}
         </span>
         <span className="min-w-0 flex-1 truncate font-mono text-[11px] text-[#202124]">
           {selectedTypeLabel}
@@ -224,13 +226,17 @@ export function SchemaPicker({
           className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
           aria-label={schemaLabel}
         >
-          {data.map((item, index) => {
-            const type = item?.['@type'];
-            const typeLabel = type ? (Array.isArray(type) ? type.join(', ') : type) : unknownType;
+          {items.map((item, index) => {
+            const typeLabel =
+              item.kind === 'parse-error'
+                ? 'JSON parse error'
+                : item.schemaTypes.join(', ') || unknownType;
             const issueCount = getIssueCount(item);
+            const pathLabel =
+              item.path.length > 0 ? ` · ${formatJsonPath(item.path)}` : '';
             return (
-              <option key={index} value={index}>
-                {index + 1}/{data.length} · {typeLabel} · {issueCount}
+              <option key={item.id} value={index}>
+                {index + 1}/{items.length} · {typeLabel}{pathLabel} · {issueCount}
               </option>
             );
           })}

@@ -28,15 +28,26 @@ Object.defineProperty(globalThis, 'chrome', {
       },
     },
     runtime: {
-      getManifest: vi.fn(() => ({ version: '2.4.0' })),
+      getManifest: vi.fn(() => ({ version: '2.5.0' })),
+      getURL: vi.fn((path: string) => `chrome-extension://test/${path}`),
       openOptionsPage: vi.fn(),
       sendMessage: vi.fn(() => Promise.resolve(null)),
+      onMessage: {
+        addListener: vi.fn(),
+        removeListener: vi.fn(),
+      },
     },
     tabs: {
       query: vi.fn(() => Promise.resolve([{ id: 1, url: 'https://example.com/' }])),
       create: vi.fn(() => Promise.resolve()),
       onUpdated: { addListener: vi.fn(), removeListener: vi.fn() },
       onActivated: { addListener: vi.fn(), removeListener: vi.fn() },
+    },
+    permissions: {
+      contains: vi.fn(() => Promise.resolve(false)),
+      request: vi.fn(() => Promise.resolve(true)),
+      remove: vi.fn(() => Promise.resolve(true)),
+      onRemoved: { addListener: vi.fn(), removeListener: vi.fn() },
     },
   },
 });

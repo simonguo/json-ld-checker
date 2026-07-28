@@ -1,18 +1,18 @@
 {
   "manifest_version": 3,
-  "name": "JSON-LD Checker",
-  "version": "2.4.0",
-  "description": "Inspect, validate, and improve JSON-LD structured data from a developer-focused browser side panel.",
-  "homepage_url": "https://github.com/simonguo/json-ld-checker",
+  "name": "__MSG_extensionName__",
+  "version": "2.5.0",
+  "description": "__MSG_extensionDescription__",
+  "default_locale": "en",
+  "homepage_url": "https://simonguo.github.io/json-ld-checker/",
   "minimum_chrome_version": "114",
   "permissions": [
     "activeTab",
     "sidePanel",
     "scripting",
-    "storage",
-    "notifications"
+    "storage"
   ],
-  "host_permissions": [
+  "optional_host_permissions": [
     "<all_urls>"
   ],
   "background": {
@@ -26,7 +26,7 @@
       "48": "icons/png/icon-inactive-48.png",
       "128": "icons/png/icon-inactive-128.png"
     },
-    "default_title": "JSON-LD Checker"
+    "default_title": "__MSG_extensionName__"
   },
   "side_panel": {
     "default_path": "src/pages/sidepanel/index.html"

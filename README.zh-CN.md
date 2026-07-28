@@ -4,19 +4,24 @@
 [![MIT License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Chrome Manifest V3](https://img.shields.io/badge/Chrome-Manifest%20V3-4285F4.svg)](manifest.json)
 
-JSON-LD Checker 是一款开源 Chromium 浏览器扩展，用于在当前页面直接检查、验证和改进 JSON-LD 结构化数据。界面遵循 Chrome DevTools 的交互习惯，方便开发者快速浏览 Schema、定位问题和检查源码。
+JSON-LD Checker 是一款开源 Chromium 浏览器扩展，用于在当前页面直接检查、验证和报告 JSON-LD 结构化数据。它会保留包括错误 JSON 在内的所有原始代码块，并通过 Chrome DevTools 风格界面帮助开发者快速诊断问题。
+
+[产品网站](https://simonguo.github.io/json-ld-checker/) ·
+[Chrome 应用商店安装](https://chromewebstore.google.com/detail/json-ld-checker/jdddgiebgdijpopfapkocdnnbgkhddln)
 
 [English](README.md)
 
 ## 功能
 
-- 自动检测当前页面中的 JSON-LD，并在扩展图标中显示状态。
+- 保留所有 JSON-LD 代码块，并显示语法错误的准确行号、列号、上下文和指针。
 - 提供 Inspector、Issues、History 三个 DevTools 风格主视图。
-- 支持多个 Schema 切换，并通过 `@type` 识别数据类型。
-- 为嵌套对象、数组和 `@graph` 生成准确的 JSONPath。
+- 支持多个代码块、顶层数组、`@graph` 与嵌套的带类型实体，并保留源码映射。
+- 在侧边栏打开期间自动重新扫描动态插入或修改的 JSON-LD。
+- 为嵌套结构生成准确的 JSONPath。
 - 点击问题即可回到 Inspector 定位；字段缺失时定位到最近存在的父节点。
 - Source 编辑器仅维护本地草稿，不会修改网页内容。
-- 支持导出 JSON-LD 和验证报告。
+- 可复制完整 `<script>`、下载原始代码块，并生成可下载 HTML 或打印为 PDF 的检查报告。
+- 一键打开 Google 富媒体结果测试和 Schema.org Markup Validator，并明确标注本地检查并非官方验证。
 - 可选接入 OpenAI、Anthropic、Gemini、Azure OpenAI、OpenRouter、DeepSeek、千问、Kimi、智谱 GLM、MiniMax、Ollama 和自定义 OpenAI 兼容端点。
 - 支持英文和简体中文。
 
@@ -54,7 +59,7 @@ npm run check        # 执行完整 CI 检查
 
 AI 功能完全可选。API Key 保存在 Chrome 扩展本地存储中；使用 AI 功能时，相关页面信息会直接发送给用户选择的模型服务商。本项目不包含分析统计或遥测代码。详细说明见 [PRIVACY.md](PRIVACY.md)。
 
-扩展需要访问页面 URL，以便在当前标签页中读取 JSON-LD。内置校验、历史记录和本地草稿均在浏览器本地处理。
+默认安装不会请求读取所有网站。扩展只在用户对当前页面主动调用时通过 `activeTab` 读取页面。用户可在设置中选择开启“自动检测”；此时才会请求 `<all_urls>`，关闭后会撤销权限并停止后台扫描。内置检查、历史记录和本地草稿均在浏览器本地处理。
 
 ## 参与贡献
 

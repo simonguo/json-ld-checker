@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { JSONTree } from 'react-json-tree';
-import { ArrowDownAZ, Check, Clipboard, Code2, Download, RotateCcw, Search, TreePine, X } from 'lucide-react';
+import { ArrowDownAZ, Check, Clipboard, Code2, Download, FileCode2, FileJson2, RotateCcw, Search, TreePine, X } from 'lucide-react';
 import { useI18n } from '@/lib/i18n';
 import {
   formatJsonPath,
@@ -14,6 +14,8 @@ import type { FocusRequest } from './types';
 
 interface InspectorViewProps {
   data: any;
+  raw?: string;
+  script?: string;
   focusRequest?: FocusRequest | null;
 }
 
@@ -67,7 +69,7 @@ function HighlightedText({
   );
 }
 
-export function InspectorView({ data, focusRequest }: InspectorViewProps) {
+export function InspectorView({ data, raw, script, focusRequest }: InspectorViewProps) {
   const { t, lang } = useI18n();
   const [viewMode, setViewMode] = useState<'tree' | 'source'>('tree');
   const [searchTerm, setSearchTerm] = useState('');
@@ -142,6 +144,28 @@ export function InspectorView({ data, focusRequest }: InspectorViewProps) {
     const type = Array.isArray(data?.['@type']) ? data['@type'][0] : data?.['@type'];
     anchor.href = url;
     anchor.download = `${type || 'json-ld'}-${Date.now()}.json`;
+    anchor.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const handleCopyScript = async () => {
+    const value = script || `<script type="application/ld+json">\n${raw || JSON.stringify(data, null, 2)}\n</script>`;
+    try {
+      await navigator.clipboard.writeText(value);
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 1600);
+    } catch (error) {
+      console.error('Failed to copy script tag:', error);
+    }
+  };
+
+  const handleExportRaw = () => {
+    const content = raw || JSON.stringify(data, null, 2);
+    const blob = new Blob([content], { type: 'application/ld+json' });
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement('a');
+    anchor.href = url;
+    anchor.download = `json-ld-block-${Date.now()}.json`;
     anchor.click();
     URL.revokeObjectURL(url);
   };
@@ -221,6 +245,24 @@ export function InspectorView({ data, focusRequest }: InspectorViewProps) {
             onClick={handleCopy}
           >
             {copied ? <Check size={15} className="text-success-500" /> : <Clipboard size={15} />}
+          </button>
+          <button
+            type="button"
+            className={toolbarIconButton}
+            aria-label={t('copyScriptTag')}
+            title={t('copyScriptTag')}
+            onClick={handleCopyScript}
+          >
+            <FileCode2 size={15} />
+          </button>
+          <button
+            type="button"
+            className={toolbarIconButton}
+            aria-label={t('downloadRawBlock')}
+            title={t('downloadRawBlock')}
+            onClick={handleExportRaw}
+          >
+            <FileJson2 size={15} />
           </button>
           <button
             type="button"

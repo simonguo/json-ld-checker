@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Schema.org Validator vs. Google Rich Results Test</title>
+    <meta name="description" content="Understand what Schema.org Markup Validator, Google Rich Results Test, and a local JSON-LD inspector each answer.">
+    <style>
+      :root{font-family:ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#17231b;background:#f8fbf9}*{box-sizing:border-box}body{margin:0}a{color:#176b36}.nav{border-bottom:1px solid #d6e3da;background:#fff}.nav div{max-width:900px;margin:auto;padding:18px 24px;display:flex;justify-content:space-between}.nav a{text-decoration:none;font-weight:700}.article{max-width:900px;margin:auto;padding:64px 24px 88px}.eyebrow{font:700 12px ui-monospace,monospace;letter-spacing:.12em;color:#176b36}h1{font-size:clamp(38px,7vw,62px);line-height:1.02;letter-spacing:-.05em;margin:16px 0 22px}h2{font-size:28px;letter-spacing:-.03em;margin-top:48px}.lede{font-size:19px;line-height:1.7;color:#52645a}p,li,td,th{font-size:15px;line-height:1.7}.table{overflow-x:auto;margin:28px 0}table{width:100%;border-collapse:collapse;background:#fff}th,td{border:1px solid #cfdcd3;padding:14px;text-align:left;vertical-align:top}th{background:#e8f5eb}.flow{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:28px 0}.flow div{border:1px solid #cfdcd3;border-radius:8px;background:#fff;padding:18px}.flow strong{display:block;margin-bottom:8px;color:#176b36}.note{border:1px solid #acd1b6;background:#e8f5eb;border-radius:8px;padding:16px 18px}.zh{border-top:1px solid #d6e3da;margin-top:64px;padding-top:48px}.cta{margin-top:48px;border-radius:10px;background:#176b36;color:#fff;padding:24px}.cta a{color:#fff;font-weight:700}.meta{color:#6a7a70;font-size:13px}@media(max-width:680px){.flow{grid-template-columns:1fr}}
+    </style>
+  </head>
+  <body>
+    <nav class="nav"><div><a href="../index.html">← JSON-LD Checker</a><a href="https://chromewebstore.google.com/detail/json-ld-checker/jdddgiebgdijpopfapkocdnnbgkhddln">Install extension</a></div></nav>
+    <article class="article">
+      <div class="eyebrow">STRUCTURED DATA VALIDATION</div>
+      <h1>Schema.org Validator and Google Rich Results Test answer different questions</h1>
+      <p class="meta">Use both—at the right stage of the workflow</p>
+      <p class="lede">“Is this Schema.org markup coherent?” and “Can Google use this page for a rich result?” are not the same question. A local inspector answers a third question: “What exactly is on this page, and where is it broken?”</p>
+
+      <div class="table">
+        <table>
+          <thead><tr><th>Tool</th><th>Best question</th><th>What it emphasizes</th><th>What it does not guarantee</th></tr></thead>
+          <tbody>
+            <tr><td>Local JSON-LD inspector</td><td>What blocks and entities are in the current rendered page?</td><td>Raw source, JSON syntax, multiple blocks, arrays, graphs, nested entities, local findings</td><td>Search-engine eligibility or indexing</td></tr>
+            <tr><td><a href="https://validator.schema.org/">Schema.org Markup Validator</a></td><td>How does this markup relate to the Schema.org vocabulary?</td><td>Schema.org types, properties, and markup structure</td><td>Google feature eligibility</td></tr>
+            <tr><td><a href="https://search.google.com/test/rich-results">Google Rich Results Test</a></td><td>Does Google recognize eligible rich-result markup on this page?</td><td>Google-supported result types, detected items, errors, and warnings</td><td>Indexing, ranking, or appearance in search results</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h2>A practical order of operations</h2>
+      <div class="flow">
+        <div><strong>1. Inspect locally</strong>Find every raw script, fix parsing errors, and verify that the rendered page contains the expected entities.</div>
+        <div><strong>2. Check Schema.org</strong>Review vocabulary and structural concerns in Schema.org Markup Validator.</div>
+        <div><strong>3. Confirm Google support</strong>Use Google Rich Results Test for Google-specific eligibility and required or recommended fields.</div>
+      </div>
+      <p>This order keeps low-level syntax and source problems from obscuring higher-level validation. It also prevents a common messaging error: describing a local heuristic as an official Google result.</p>
+
+      <h2>Why results can disagree</h2>
+      <ul>
+        <li><strong>Different scope:</strong> Schema.org defines a broad vocabulary; Google supports selected search features and has its own documentation.</li>
+        <li><strong>Different page state:</strong> A browser inspector may see client-rendered markup while a remote validator can receive a different response or fail to execute the same flow.</li>
+        <li><strong>Different severity:</strong> A field may be valid Schema.org but irrelevant to a Google feature, or recommended by Google without being required by the vocabulary.</li>
+        <li><strong>Different timing:</strong> cached content, deployments, redirects, authentication, or consent flows can change which markup each tool receives.</li>
+      </ul>
+
+      <div class="note"><strong>Use precise language in reports.</strong> Prefer “local Schema.org structure check,” “Google Rich Results Test result,” and “local SEO suggestion.” Avoid a single generic “validated” badge that collapses all three.</div>
+
+      <h2>What a good handoff report contains</h2>
+      <ul>
+        <li>The exact URL and inspection time.</li>
+        <li>Every original JSON-LD block, including invalid ones.</li>
+        <li>Line and column for JSON parsing failures.</li>
+        <li>Block-to-entity paths for arrays, <code>@graph</code>, and nested types.</li>
+        <li>Clearly labeled local findings.</li>
+        <li>Links for independently running official validators.</li>
+      </ul>
+
+      <div class="cta">JSON-LD Checker combines the local part of this workflow with one-click official validator links and an exportable report. <a href="https://chromewebstore.google.com/detail/json-ld-checker/jdddgiebgdijpopfapkocdnnbgkhddln">Open it in Chrome →</a></div>
+
+      <section class="zh" lang="zh-CN">
+        <div class="eyebrow">中文摘要</div>
+        <h2>Schema.org Validator 与 Google 富媒体结果测试有什么区别</h2>
+        <p>这两个工具回答的问题不同。Schema.org Markup Validator 关注标记与 Schema.org 词汇和结构的关系；Google 富媒体结果测试关注 Google 是否识别页面中符合其搜索功能要求的结构化数据。前者通过不代表一定符合 Google 富媒体结果资格，后者通过也不保证页面一定被收录、获得排名或实际展示富媒体结果。</p>
+        <p>更稳妥的顺序是：先在本地检查原始代码块和 JSON 语法，再使用 Schema.org 工具检查词汇结构，最后使用 Google 工具确认平台资格。报告中应明确区分“本地 Schema.org 结构检查”“Google 富媒体结果测试结果”和“本地 SEO 建议”，不要把它们合并成一个含糊的“已验证”结论。</p>
+      </section>
+    </article>
+  </body>
+</html>

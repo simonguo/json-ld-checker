@@ -6,6 +6,7 @@ import {
   ChevronRight,
   Download,
   ExternalLink,
+  FileText,
   Info,
   Lightbulb,
   MoreHorizontal,
@@ -14,6 +15,13 @@ import { EmptyState } from '@/components/ui';
 import { formatJsonPath } from '@/lib/json-path';
 import { useI18n } from '@/lib/i18n';
 import { validator, type ValidationResult } from '@/lib/validator';
+import {
+  buildGoogleRichResultsUrl,
+  buildSchemaValidatorUrl,
+  isExternallyValidatableUrl,
+} from '@/lib/external-validators';
+import type { JsonLdScanResult } from '@/lib/json-ld';
+import { createJsonLdReport, openJsonLdReport } from '@/lib/report';
 
 type IssueFilter = 'all' | ValidationResult['type'];
 
@@ -27,10 +35,16 @@ const resultConfig = {
 export function IssuesView({
   data,
   pageUrl,
+  scanResult,
+  defaultActionsOpen = false,
+  onReportOpened,
   onNavigate,
 }: {
   data: any;
   pageUrl: string;
+  scanResult: JsonLdScanResult;
+  defaultActionsOpen?: boolean;
+  onReportOpened?: () => void;
   onNavigate: (path: NonNullable<ValidationResult['path']>) => void;
 }) {
   const { t, lang } = useI18n();
@@ -44,11 +58,14 @@ export function IssuesView({
   const visibleResults = filter === 'all' ? allResults : allResults.filter((result) => result.type === filter);
   const schemaType = Array.isArray(data?.['@type']) ? data['@type'][0] : data?.['@type'];
   const schemaOrgUrl = schemaType ? `https://schema.org/${encodeURIComponent(schemaType)}` : null;
+  const canOpenExternalValidator = isExternallyValidatableUrl(pageUrl);
 
   const handleGoogleTest = () => {
-    if (pageUrl) {
-      window.open(`https://search.google.com/test/rich-results?url=${encodeURIComponent(pageUrl)}`, '_blank');
-    }
+    window.open(buildGoogleRichResultsUrl(pageUrl), '_blank');
+  };
+
+  const handleSchemaValidator = () => {
+    window.open(buildSchemaValidatorUrl(pageUrl), '_blank');
   };
 
   const handleExport = () => {
@@ -69,6 +86,11 @@ export function IssuesView({
     anchor.download = `validation-${schemaType || 'results'}-${Date.now()}.json`;
     anchor.click();
     URL.revokeObjectURL(url);
+  };
+
+  const handleReport = async () => {
+    await openJsonLdReport(createJsonLdReport(scanResult, pageUrl, lang));
+    onReportOpened?.();
   };
 
   const filters = [
@@ -100,7 +122,7 @@ export function IssuesView({
           <AlertTriangle size={12} /> {summary.warnings}
         </span>
 
-        <details className="relative flex-none">
+        <details className="relative flex-none" open={defaultActionsOpen || undefined}>
           <summary
             className="flex h-7 w-7 cursor-pointer list-none items-center justify-center rounded-[3px] text-[#5f6368] hover:bg-[#e8eaed] hover:text-[#202124] [&::-webkit-details-marker]:hidden"
             aria-label={t('moreActions')}
@@ -111,11 +133,19 @@ export function IssuesView({
           <div className="absolute right-0 z-20 mt-1 w-52 rounded-[4px] border border-[#c7d1e0] bg-white p-1 shadow-overlay">
             <button
               type="button"
-              disabled={!pageUrl}
+              disabled={!canOpenExternalValidator}
               onClick={handleGoogleTest}
               className="flex w-full items-center gap-2 rounded-[3px] px-2.5 py-2 text-left text-[11px] text-[#202124] hover:bg-[#e8f0fe] disabled:opacity-50"
             >
-              <ExternalLink size={14} /> {t('googleTest')}
+              <ExternalLink size={14} /> {t('googleRichResultsTest')}
+            </button>
+            <button
+              type="button"
+              disabled={!canOpenExternalValidator}
+              onClick={handleSchemaValidator}
+              className="flex w-full items-center gap-2 rounded-[3px] px-2.5 py-2 text-left text-[11px] text-[#202124] hover:bg-[#e8f0fe] disabled:opacity-50"
+            >
+              <ExternalLink size={14} /> {t('schemaMarkupValidator')}
             </button>
             {schemaOrgUrl && (
               <a
@@ -133,6 +163,13 @@ export function IssuesView({
               className="flex w-full items-center gap-2 rounded-[3px] px-2.5 py-2 text-left text-[11px] text-[#202124] hover:bg-[#e8f0fe]"
             >
               <Download size={14} /> {t('exportValidation')}
+            </button>
+            <button
+              type="button"
+              onClick={handleReport}
+              className="flex w-full items-center gap-2 rounded-[3px] px-2.5 py-2 text-left text-[11px] text-[#202124] hover:bg-[#e8f0fe]"
+            >
+              <FileText size={14} /> {t('openInspectionReport')}
             </button>
           </div>
         </details>
@@ -161,6 +198,13 @@ export function IssuesView({
             </button>
           );
         })}
+      </div>
+
+      <div
+        role="note"
+        className="flex-none border-b border-[#d6deeb] bg-[#f8f9fa] px-2.5 py-1.5 text-[9px] leading-4 text-[#5f6368]"
+      >
+        {t('localValidationDisclosure')}
       </div>
 
       <div className="min-h-0 flex-1 overflow-auto">

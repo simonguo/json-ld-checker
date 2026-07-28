@@ -1,0 +1,22 @@
+{
+  "extensionName": {
+    "message": "JSON-LD Checker – Schema Validator",
+    "description": "Extension name"
+  },
+  "extensionDescription": {
+    "message": "Inspect Schema.org JSON-LD, locate errors, and validate structured data from a private browser side panel.",
+    "description": "Extension summary"
+  },
+  "iconTitleFound": {
+    "message": "JSON-LD Checker – Found $1 JSON-LD entities",
+    "description": "Toolbar title when JSON-LD is present"
+  },
+  "iconTitleNotFound": {
+    "message": "JSON-LD Checker – No JSON-LD found",
+    "description": "Toolbar title when JSON-LD is absent"
+  },
+  "iconTitleInvalid": {
+    "message": "JSON-LD Checker – Invalid JSON-LD found",
+    "description": "Toolbar title when malformed JSON-LD is present"
+  }
+}

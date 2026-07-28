@@ -8,6 +8,8 @@ import { AssistView } from './AssistView';
 import { HistoryView } from './HistoryView';
 import { InspectorView } from './InspectorView';
 import { IssuesView } from './IssuesView';
+import { ParseErrorView } from './ParseErrorView';
+import { ReviewPrompt } from './components/ReviewPrompt';
 import {
   PrimaryNav,
   SchemaPicker,
@@ -15,6 +17,10 @@ import {
 } from './components/SidePanelChrome';
 import { useJsonLdSession } from './hooks/useJsonLdSession';
 import type { FocusRequest, SidePanelView } from './types';
+import type { JsonLdInspectionItem } from '@/lib/json-ld';
+import type { ValidationSummary } from '@/lib/validator';
+import { createJsonLdReport, openJsonLdReport } from '@/lib/report';
+import { useReviewPrompt } from './hooks/useReviewPrompt';
 
 export default function SidePanelPage() {
   const { t, lang } = useI18n();
@@ -24,20 +30,27 @@ export default function SidePanelPage() {
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [focusRequest, setFocusRequest] = useState<FocusRequest | null>(null);
   const focusToken = useRef(0);
+  const reviewPrompt = useReviewPrompt(
+    state.currentTabUrl,
+    Boolean(state.jsonData?.entities.length),
+  );
 
-  const selectedData = state.jsonData?.data[selectedIndex];
+  const selectedItem = state.jsonData?.items[selectedIndex];
+  const selectedData = selectedItem?.kind === 'entity' ? selectedItem.data : undefined;
   const validationResults = useMemo(
     () => (selectedData ? validator.validate(selectedData, lang) : null),
     [selectedData, lang],
   );
-  const summary = useMemo(
-    () => (validationResults ? validator.getSummary(validationResults) : undefined),
-    [validationResults],
-  );
+  const summary = useMemo<ValidationSummary | undefined>(() => {
+    if (selectedItem?.kind === 'parse-error') {
+      return { total: 1, errors: 1, warnings: 0, suggestions: 0, isValid: false };
+    }
+    return validationResults ? validator.getSummary(validationResults) : undefined;
+  }, [selectedItem, validationResults]);
   const issueCount = (summary?.errors || 0) + (summary?.warnings || 0);
 
   useEffect(() => {
-    const count = state.jsonData?.data.length || 0;
+    const count = state.jsonData?.items.length || 0;
     if (selectedIndex >= count) setSelectedIndex(0);
   }, [selectedIndex, state.jsonData]);
 
@@ -72,8 +85,9 @@ export default function SidePanelPage() {
     setCurrentView('inspector');
   };
 
-  const getIssueCount = (data: any) => {
-    const result = validator.getSummary(validator.validate(data, lang));
+  const getIssueCount = (item: JsonLdInspectionItem) => {
+    if (!item || item.kind === 'parse-error') return 1;
+    const result = validator.getSummary(validator.validate(item.data, lang));
     return result.errors + result.warnings;
   };
 
@@ -140,25 +154,48 @@ export default function SidePanelPage() {
       );
     }
 
-    if (!selectedData) return renderEmptyData();
+    if (!selectedItem) return renderEmptyData();
+    if (selectedItem.kind === 'parse-error') {
+      return (
+        <ParseErrorView
+          item={selectedItem}
+          onReport={() =>
+            state.jsonData &&
+            openJsonLdReport(
+              createJsonLdReport(state.jsonData, state.currentTabUrl, lang),
+            ).then(() => reviewPrompt.actions.reportExported())
+          }
+        />
+      );
+    }
     if (currentView === 'issues') {
       return (
         <IssuesView
-          data={selectedData}
+          data={selectedItem.data}
           pageUrl={state.currentTabUrl}
+          scanResult={state.jsonData!}
+          onReportOpened={reviewPrompt.actions.reportExported}
           onNavigate={navigateToIssue}
         />
       );
     }
 
-    return <InspectorView data={selectedData} focusRequest={focusRequest} />;
+    const block = state.jsonData?.blocks[selectedItem.blockIndex];
+    return (
+      <InspectorView
+        data={selectedItem.data}
+        raw={block?.raw}
+        script={block?.script}
+        focusRequest={focusRequest}
+      />
+    );
   };
 
   return (
-    <div className="flex h-screen min-h-0 flex-col overflow-hidden bg-canvas text-ink">
+    <div className="relative flex h-screen min-h-0 flex-col overflow-hidden bg-canvas text-ink">
       <SidePanelHeader
         hostname={hostname}
-        schemaCount={state.jsonData?.count || 0}
+        schemaCount={state.jsonData?.blockCount || 0}
         summary={summary}
         refreshing={state.refreshing}
         aiActive={currentView === 'assist'}
@@ -192,7 +229,7 @@ export default function SidePanelPage() {
 
       {(currentView === 'inspector' || currentView === 'issues') && state.jsonData && (
         <SchemaPicker
-          data={state.jsonData.data}
+          items={state.jsonData.items}
           selectedIndex={selectedIndex}
           onChange={setSelectedIndex}
           getIssueCount={getIssueCount}
@@ -202,6 +239,17 @@ export default function SidePanelPage() {
       )}
 
       <main className="min-h-0 flex-1 bg-canvas">{renderContent()}</main>
+
+      {reviewPrompt.state.visible && (
+        <ReviewPrompt
+          title={t('reviewPromptTitle')}
+          description={t('reviewPromptDescription')}
+          reviewLabel={t('reviewExtension')}
+          dismissLabel={t('notNow')}
+          onReview={reviewPrompt.actions.review}
+          onDismiss={reviewPrompt.actions.dismiss}
+        />
+      )}
     </div>
   );
 }

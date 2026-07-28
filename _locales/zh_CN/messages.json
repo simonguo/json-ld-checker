@@ -1,0 +1,22 @@
+{
+  "extensionName": {
+    "message": "JSON-LD 检查器 – Schema 结构化数据验证",
+    "description": "扩展名称"
+  },
+  "extensionDescription": {
+    "message": "在隐私友好的浏览器侧边栏中检查 Schema.org JSON-LD、精确定位错误并验证结构化数据。",
+    "description": "扩展摘要"
+  },
+  "iconTitleFound": {
+    "message": "JSON-LD 检查器 – 发现 $1 个 JSON-LD 实体",
+    "description": "发现 JSON-LD 时的工具栏提示"
+  },
+  "iconTitleNotFound": {
+    "message": "JSON-LD 检查器 – 未发现 JSON-LD",
+    "description": "未发现 JSON-LD 时的工具栏提示"
+  },
+  "iconTitleInvalid": {
+    "message": "JSON-LD 检查器 – 发现无效 JSON-LD",
+    "description": "发现错误 JSON-LD 时的工具栏提示"
+  }
+}

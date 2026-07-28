@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>JSON-LD Checker – Schema Validator</title>
+    <meta name="description" content="Inspect JSON-LD, pinpoint syntax errors, validate Schema.org structure, and export focused reports from a privacy-first Chrome extension.">
+    <meta name="theme-color" content="#176b36">
+    <meta property="og:title" content="JSON-LD Checker – Schema Validator">
+    <meta property="og:description" content="Broken JSON-LD never disappears. Inspect every block, locate errors, validate structure, and export reports.">
+    <meta property="og:type" content="website">
+    <meta property="og:image" content="assets/01-inspector.png">
+    <style>
+      :root{--green:#176b36;--green-dark:#0d4824;--mint:#e6f4ea;--ink:#142219;--muted:#52645a;--line:#cfddd3;--paper:#fbfdfb;--code:#0d1611;color-scheme:light;font-family:Inter,ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+      *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;color:var(--ink);background:var(--paper)}a{color:inherit}img{max-width:100%;display:block}.wrap{width:min(1120px,calc(100% - 40px));margin:auto}
+      .nav{position:sticky;top:0;z-index:20;border-bottom:1px solid rgba(207,221,211,.8);background:rgba(251,253,251,.92);backdrop-filter:blur(12px)}.nav-inner{height:64px;display:flex;align-items:center;gap:22px}.brand{display:flex;align-items:center;gap:10px;text-decoration:none;font-weight:750}.mark{width:34px;height:34px;display:grid;place-items:center;border:1px solid #99c8a6;border-radius:8px;background:#fff;color:var(--green);font:700 17px ui-monospace,monospace}.nav-links{margin-left:auto;display:flex;align-items:center;gap:20px}.nav-links a{text-decoration:none;color:var(--muted);font-size:14px}.button{display:inline-flex;align-items:center;justify-content:center;min-height:42px;padding:0 18px;border:1px solid transparent;border-radius:7px;text-decoration:none;font-weight:700;font-size:14px}.button.primary{background:var(--green);color:#fff}.button.secondary{border-color:#a8bbb0;background:#fff}.hero{overflow:hidden;background:radial-gradient(circle at 80% 10%,#cfead6 0,transparent 32%),linear-gradient(180deg,#f3faf5,#fbfdfb);padding:92px 0 72px}.hero-grid{display:grid;grid-template-columns:minmax(0,.85fr) minmax(500px,1.15fr);gap:54px;align-items:center}.eyebrow{font:700 12px ui-monospace,SFMono-Regular,monospace;letter-spacing:.13em;color:var(--green)}h1{font-size:clamp(44px,6vw,70px);line-height:.98;letter-spacing:-.055em;margin:16px 0 24px;max-width:700px}.lede{font-size:19px;line-height:1.65;color:var(--muted);max-width:650px}.actions{display:flex;flex-wrap:wrap;gap:10px;margin:30px 0 20px}.trust{display:flex;flex-wrap:wrap;gap:8px 18px;color:var(--muted);font-size:13px}.trust span:before{content:"✓";color:var(--green);font-weight:800;margin-right:6px}.hero-shot{border:1px solid #aabbb0;border-radius:14px;overflow:hidden;background:#fff;box-shadow:0 28px 70px rgba(24,73,40,.18);transform:rotate(1deg)}.browser-bar{height:34px;background:#edf2ee;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:6px;padding:0 12px}.browser-bar span{width:8px;height:8px;border-radius:50%;background:#9cac9f;font-size:0}.section{padding:84px 0}.section.alt{background:#f0f7f2;border-block:1px solid #dce9df}.section h2{font-size:clamp(30px,4vw,46px);line-height:1.08;letter-spacing:-.04em;margin:0 0 16px}.section-intro{max-width:700px;color:var(--muted);font-size:17px;line-height:1.65}.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:36px}.card{border:1px solid var(--line);border-radius:10px;background:#fff;padding:22px}.card .num{font:700 11px ui-monospace,monospace;color:var(--green)}.card h3{margin:14px 0 8px;font-size:18px}.card p{margin:0;color:var(--muted);font-size:14px;line-height:1.6}.gallery{display:grid;grid-template-columns:repeat(2,1fr);gap:18px;margin-top:34px}.gallery figure{margin:0;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:white}.gallery figure:first-child{grid-column:1/-1}.gallery figcaption{padding:12px 14px;color:var(--muted);font-size:13px}.compare{display:grid;grid-template-columns:1fr 1fr;gap:22px;margin-top:34px}.compare>div{border-radius:10px;padding:26px}.compare .local{background:#fff;border:1px solid var(--line)}.compare .official{background:var(--code);color:#eef8f0}.compare h3{margin-top:0}.compare p{line-height:1.6;color:inherit;opacity:.78}.faq{display:grid;grid-template-columns:1fr 1.4fr;gap:50px}.faq details{border-bottom:1px solid var(--line);padding:16px 0}.faq summary{cursor:pointer;font-weight:700}.faq details p{color:var(--muted);line-height:1.65}.cta{background:var(--green-dark);color:white;padding:64px 0}.cta-inner{display:flex;align-items:center;gap:30px}.cta h2{margin:0;font-size:38px;letter-spacing:-.035em}.cta p{color:#cbe3d1;margin:8px 0 0}.cta .actions{margin:0 0 0 auto;flex:none}.footer{padding:28px 0;color:var(--muted);font-size:13px}.footer-inner{display:flex;gap:20px}.footer a:first-of-type{margin-left:auto}
+      @media(max-width:900px){.hero-grid{grid-template-columns:1fr}.hero{padding-top:64px}.grid{grid-template-columns:1fr 1fr}.faq{grid-template-columns:1fr}.cta-inner{display:block}.cta .actions{margin:24px 0 0}.hero-shot{transform:none}.nav-links a:not(.button){display:none}}
+      @media(max-width:600px){.wrap{width:min(100% - 28px,1120px)}.nav .secondary{display:none}.hero{padding:52px 0}.hero-grid{gap:36px}h1{font-size:46px}.section{padding:60px 0}.grid,.gallery,.compare{grid-template-columns:1fr}.gallery figure:first-child{grid-column:auto}.footer-inner{flex-wrap:wrap}.footer a:first-of-type{margin-left:0}.cta h2{font-size:32px}}
+      @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+    </style>
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "JSON-LD Checker – Schema Validator",
+        "applicationCategory": "DeveloperApplication",
+        "operatingSystem": "Chrome, Chromium",
+        "isAccessibleForFree": true,
+        "license": "https://opensource.org/license/mit",
+        "url": "https://simonguo.github.io/json-ld-checker/",
+        "downloadUrl": "https://chromewebstore.google.com/detail/json-ld-checker/jdddgiebgdijpopfapkocdnnbgkhddln",
+        "codeRepository": "https://github.com/simonguo/json-ld-checker"
+      }
+    </script>
+  </head>
+  <body>
+    <nav class="nav" aria-label="Primary">
+      <div class="wrap nav-inner">
+        <a class="brand" href="#"><span class="mark">{ }</span><span>JSON-LD Checker</span></a>
+        <div class="nav-links">
+          <a href="#features">Features</a>
+          <a href="#privacy">Privacy</a>
+          <a href="#guides">Guides</a>
+          <a class="button secondary" href="https://github.com/simonguo/json-ld-checker">View source</a>
+          <a class="button primary" href="https://chromewebstore.google.com/detail/json-ld-checker/jdddgiebgdijpopfapkocdnnbgkhddln">Add to Chrome</a>
+        </div>
+      </div>
+    </nav>
+
+    <header class="hero">
+      <div class="wrap hero-grid">
+        <div>
+          <div class="eyebrow">SCHEMA VALIDATION THAT KEEPS THE EVIDENCE</div>
+          <h1>Broken JSON-LD never disappears.</h1>
+          <p class="lede">Inspect every raw block, pinpoint JSON syntax errors, navigate Schema.org findings, open official validators, and export a report—all from the current page.</p>
+          <div class="actions">
+            <a class="button primary" href="https://chromewebstore.google.com/detail/json-ld-checker/jdddgiebgdijpopfapkocdnnbgkhddln">Install from Chrome Web Store</a>
+            <a class="button secondary" href="https://github.com/simonguo/json-ld-checker">Explore on GitHub</a>
+          </div>
+          <div class="trust"><span>Open source</span><span>Local validation</span><span>No extension telemetry</span></div>
+        </div>
+        <div class="hero-shot">
+          <div class="browser-bar" aria-hidden="true"><span>&nbsp;</span><span>&nbsp;</span><span>&nbsp;</span></div>
+          <img src="assets/01-inspector.png" alt="JSON-LD Checker inspector displaying Product structured data">
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <section class="section" id="features">
+        <div class="wrap">
+          <div class="eyebrow">FOCUSED ON JSON-LD</div>
+          <h2>From raw source to a useful answer.</h2>
+          <p class="section-intro">The extension stays deliberately narrow: diagnose JSON-LD accurately, preserve its source, explain local findings, and make official confirmation easy.</p>
+          <div class="grid">
+            <article class="card"><div class="num">01 / PRESERVE</div><h3>Every original block</h3><p>Malformed JSON-LD remains visible instead of being silently converted into “nothing found.”</p></article>
+            <article class="card"><div class="num">02 / LOCATE</div><h3>Line, column, context</h3><p>Syntax diagnostics include a source excerpt and caret, plus copy and download actions.</p></article>
+            <article class="card"><div class="num">03 / UNDERSTAND</div><h3>Arrays, graphs, nesting</h3><p>Top-level arrays, <code>@graph</code>, and nested typed entities stay linked to their source block.</p></article>
+            <article class="card"><div class="num">04 / NAVIGATE</div><h3>Issue to JSONPath</h3><p>Move from a local finding directly to the relevant node or nearest existing parent.</p></article>
+            <article class="card"><div class="num">05 / CONFIRM</div><h3>Official validator shortcuts</h3><p>Open the current URL in Google Rich Results Test or Schema.org Markup Validator.</p></article>
+            <article class="card"><div class="num">06 / SHARE</div><h3>HTML and PDF-ready reports</h3><p>Include source blocks, parsing errors, entities, and local results in one focused artifact.</p></article>
+          </div>
+        </div>
+      </section>
+
+      <section class="section alt" id="guides">
+        <div class="wrap">
+          <div class="eyebrow">SEE THE WORKFLOW</div>
+          <h2>Inspect, locate, validate, report.</h2>
+          <div class="gallery">
+            <figure><img src="assets/02-syntax-error.png" alt="Malformed JSON-LD with an exact line and column"><figcaption>Invalid blocks remain visible with precise syntax diagnostics.</figcaption></figure>
+            <figure><img src="assets/03-issues.png" alt="Local structured data findings and validator shortcuts"><figcaption>Navigate local findings and confirm against official validators.</figcaption></figure>
+            <figure><img src="assets/04-report.png" alt="Shareable JSON-LD inspection report"><figcaption>Download HTML or print a clean, PDF-ready report.</figcaption></figure>
+          </div>
+          <div class="actions">
+            <a class="button secondary" href="articles/malformed-json-ld.html">Why malformed JSON-LD looks “missing”</a>
+            <a class="button secondary" href="articles/schema-validator-vs-rich-results.html">Schema.org vs. Google validation</a>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="privacy">
+        <div class="wrap">
+          <div class="eyebrow">HONEST VALIDATION BOUNDARIES</div>
+          <h2>Local diagnosis and platform eligibility are different jobs.</h2>
+          <div class="compare">
+            <div class="local"><h3>Inside the extension</h3><p>JSON parsing, Schema.org structure checks, navigation, report generation, settings, and history run locally in Chrome.</p></div>
+            <div class="official"><h3>Inside official tools</h3><p>Google decides rich-result eligibility. Schema.org Markup Validator provides its own vocabulary validation. The extension opens both with the current URL.</p></div>
+          </div>
+          <div class="grid">
+            <article class="card"><h3>Minimal by default</h3><p>The extension reads the active page only after you invoke it. There is no default all-sites access.</p></article>
+            <article class="card"><h3>Automatic detection is opt-in</h3><p>All-sites permission is requested only when you enable automatic detection and removed when you turn it off.</p></article>
+            <article class="card"><h3>No project telemetry</h3><p>No analytics, advertising, user tracking, or project-operated data service runs inside the extension.</p></article>
+          </div>
+        </div>
+      </section>
+
+      <section class="section alt">
+        <div class="wrap faq">
+          <div><div class="eyebrow">FAQ</div><h2>Clear before you install.</h2></div>
+          <div>
+            <details open><summary>Does it modify the page?</summary><p>No. Source edits are local drafts. JSON-LD Checker never writes them into the inspected website.</p></details>
+            <details><summary>Does “valid” guarantee a Google rich result?</summary><p>No. Local checks are explicitly labeled. Use the shortcut to confirm eligibility in Google Rich Results Test.</p></details>
+            <details><summary>Why are there more entities than script blocks?</summary><p>One block can contain an array, <code>@graph</code>, or nested typed entities. The tool keeps the block-to-entity mapping.</p></details>
+            <details><summary>Is AI required?</summary><p>No. Inspection, syntax diagnostics, validation, navigation, external validator links, and reports work without AI or an API key.</p></details>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <section class="cta">
+      <div class="wrap cta-inner">
+        <div><h2>Inspect structured data with its source intact.</h2><p>Free, open source, and local first.</p></div>
+        <div class="actions"><a class="button primary" href="https://chromewebstore.google.com/detail/json-ld-checker/jdddgiebgdijpopfapkocdnnbgkhddln">Add to Chrome</a></div>
+      </div>
+    </section>
+    <footer class="footer">
+      <div class="wrap footer-inner"><span>JSON-LD Checker · MIT License</span><a href="https://github.com/simonguo/json-ld-checker/blob/main/PRIVACY.md">Privacy</a><a href="https://github.com/simonguo/json-ld-checker/issues">Feedback</a><a href="https://github.com/simonguo/json-ld-checker/releases">Changelog</a></div>
+    </footer>
+  </body>
+</html>

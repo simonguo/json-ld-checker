@@ -34,7 +34,7 @@ function SettingsVisualFixture() {
           </div>
           <div className="min-w-0 flex-1">
             <h1 className="truncate text-sm font-semibold">{t('settingsTitle')}</h1>
-            <p className="font-mono text-[10px] text-muted">JSON-LD Checker v2.4.0</p>
+            <p className="font-mono text-[10px] text-muted">JSON-LD Checker v2.5.0</p>
           </div>
         </div>
       </header>

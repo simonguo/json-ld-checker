@@ -5,25 +5,31 @@
 [![Chrome Manifest V3](https://img.shields.io/badge/Chrome-Manifest%20V3-4285F4.svg)](manifest.json)
 
 JSON-LD Checker is an open-source Chromium extension for inspecting, validating,
-and improving JSON-LD structured data without leaving the current page. Its UI
-follows Chrome DevTools conventions so developers can scan schemas, locate
-issues, and review source data quickly.
+and reporting JSON-LD structured data without leaving the current page. It
+preserves every source block—including malformed JSON—and follows Chrome
+DevTools conventions for fast diagnosis.
+
+[Product site](https://simonguo.github.io/json-ld-checker/) ·
+[Install from Chrome Web Store](https://chromewebstore.google.com/detail/json-ld-checker/jdddgiebgdijpopfapkocdnnbgkhddln)
 
 [简体中文](README.zh-CN.md)
 
 ## Features
 
-- Detects JSON-LD blocks on the current page and reports their status in the
-  extension icon.
+- Preserves every JSON-LD block and pinpoints syntax errors by line, column,
+  source excerpt, and caret.
 - Provides a DevTools-style side panel with Inspector, Issues, and History.
-- Switches cleanly between multiple schemas and identifies each schema by
-  `@type`.
-- Validates nested objects, arrays, and `@graph` entries with precise JSONPath
-  locations.
+- Understands multiple blocks, top-level arrays, `@graph`, and nested typed
+  entities while retaining their source-block mapping.
+- Rescans JSON-LD inserted or changed while the side panel is open.
+- Validates nested structures with precise JSONPath locations.
 - Opens an issue directly in the Inspector and falls back to the nearest
   existing ancestor for missing fields.
 - Offers a local Source draft editor that never modifies the inspected page.
-- Exports JSON-LD and validation reports.
+- Copies complete `<script>` tags, downloads raw blocks, and creates focused
+  HTML/PDF-ready reports.
+- Opens the current URL in Google Rich Results Test and Schema.org Markup
+  Validator, with local findings clearly labeled as non-official checks.
 - Optionally reviews or drafts JSON-LD through OpenAI, Anthropic, Gemini, Azure
   OpenAI, OpenRouter, DeepSeek, Qwen, Kimi, Zhipu GLM, MiniMax, Ollama, or a
   custom OpenAI-compatible endpoint.
@@ -76,13 +82,16 @@ the user. See [Privacy](PRIVACY.md) for details.
 
 ## Permissions
 
-The extension requests access to all page URLs so it can inspect JSON-LD on the
-active page. It also uses:
+The default install does not request access to every website. It uses:
 
-- `activeTab` and `scripting` to scan the current page on demand.
+- `activeTab` and `scripting` to scan only the current page after the user
+  invokes the extension.
 - `sidePanel` to host the developer interface.
-- `storage` for settings, local drafts, and history.
-- `notifications` for extension update notifications.
+- `storage` for settings, local drafts, history, and one-time UI prompts.
+
+Automatic page-load detection and icon badges are optional. Enabling that
+setting requests `<all_urls>` access from a user gesture; disabling it removes
+the permission and stops background scanning.
 
 JSON-LD inspection and local validation run in the browser. The project does
 not include analytics or telemetry.
