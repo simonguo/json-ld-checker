@@ -46,20 +46,20 @@
   },
   "devDependencies": {
     "@crxjs/vite-plugin": "^2.0.0-beta.23",
-    "@testing-library/jest-dom": "^7.0.0",
+    "@testing-library/jest-dom": "^7.0.1",
     "@testing-library/react": "^16.3.2",
-    "@types/chrome": "^0.0.270",
-    "@types/node": "^20.11.5",
+    "@types/chrome": "^0.2.7",
+    "@types/node": "^26.3.0",
     "@types/react": "^18.2.48",
     "@types/react-dom": "^18.2.18",
-    "@vitejs/plugin-react": "^5.2.0",
-    "autoprefixer": "^10.4.17",
-    "jsdom": "^29.1.1",
-    "postcss": "^8.4.33",
-    "tailwindcss": "^3.4.1",
-    "terser": "^5.46.2",
-    "typescript": "^5.3.3",
-    "vite": "^8.1.5",
-    "vitest": "^4.1.10"
+    "@vitejs/plugin-react": "^6.1.0",
+    "autoprefixer": "^10.5.4",
+    "jsdom": "^30.0.1",
+    "postcss": "^8.5.26",
+    "tailwindcss": "^4.3.3",
+    "terser": "^5.50.0",
+    "typescript": "^7.0.2",
+    "vite": "^8.2.2",
+    "vitest": "^4.1.11"
   }
 }
