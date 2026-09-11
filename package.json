@@ -38,7 +38,7 @@
     "test": "vitest run && node --test scripts/*.node-test.mjs"
   },
   "dependencies": {
-    "lucide-react": "^0.460.0",
+    "lucide-react": "^1.42.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-json-tree": "^0.20.0",
